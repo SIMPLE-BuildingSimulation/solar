@@ -1,7 +1,7 @@
 use calendar::date::Date;
 use geometry3d::vector3d::Vector3D;
 
-/// Solar calculations library. Base on Duffy and Beckman's excellent book.
+/// Solar calculations library. Base on Duffie and Beckman's excellent book.
 /// 
 /// We follow the convention of the book. This means that everything is in 
 /// international units, and times are solar. Angles (inputs and outputs) are 
@@ -123,7 +123,7 @@ impl Solar {
     }
     
     /// Normal extraterrestrial radiation (Gon)
-    /// Equation 1.4.1b from Duffy and Beckman
+    /// Equation 1.4.1b from Duffie and Beckman
     /// 
     /// n should be in solar time, but this variable does not change daily so
     /// it probably does not matter
@@ -242,7 +242,7 @@ mod tests {
     #[test]
     fn test_from_standard_time(){        
         /*
-        Example 1.5.1 in Duffy & Beckman
+        Example 1.5.1 in Duffie & Beckman
         At Madison, Wisconsin, what is the solar time corresponding to 10:30 AM central time on February 3?
 
         Answer: 10:19
@@ -271,7 +271,7 @@ mod tests {
 
             println!("exp: {}, found: {}", expected_d, in_degrees(d));
             // I suspect I need this margin of error (1.8 deg.)
-            // because Duffy and Beckam do not specify the hour
+            // because Duffie and Beckam do not specify the hour
             // of the day or the exact equation they use.
             assert!(are_close(in_degrees(d), expected_d, 1.8))
 
