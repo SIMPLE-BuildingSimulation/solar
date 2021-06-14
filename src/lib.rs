@@ -1,7 +1,6 @@
-use calendar::date::Date;
 use geometry3d::vector3d::Vector3D;
 
-/// Solar calculations library. Base on Duffie and Beckman's excellent book.
+/// Solar calculations library. Based on Duffie and Beckman's excellent book.
 /// 
 /// We follow the convention of the book. This means that everything is in 
 /// international units, and times are solar. Angles (inputs and outputs) are 
@@ -18,14 +17,17 @@ use geometry3d::vector3d::Vector3D;
 /// distinction is there so that we don't mistake solar and 
 /// standard time
 pub struct Solar {
-    /// Day of the year
-    n: f64,
+    // Day of the year
+    //n: f64,
 
     /// Latitude in Radians
     latitude: f64,
 
-    //longitude:f64,
-    //standard_meridian: f64,
+    /// Longitude (in Radians)
+    longitude:f64,
+
+    /// Standard meridian (in Radians)
+    standard_meridian: f64,
 }
 
 /// W/m2
@@ -43,112 +45,122 @@ pub fn in_radians(degrees:f64)->f64{
     degrees * std::f64::consts::PI/180.0
 }
 
-/// The Equation of Time based on the day of year (can have decimals)
-/// 
-/// n should be in solar time, but this variable does not change daily so
-/// it probably does not matter
-pub fn equation_of_time(n: f64)->f64{
-    let b = b(n);
-    229.2*(0.000075 + 0.001868*b.cos()-0.032077*b.sin() - 0.014615*(2.0*b).cos() - 0.04089*(2.0*b).sin())
+pub enum Time{
+    Solar(f64),
+    Standard(f64),
 }
 
-/// Declination (in Radians), according to Equation 1.6.1B
-/// 
-/// n should be in solar time, but this variable does not change daily so
-/// it probably does not matter
-pub fn declination(n:f64)->f64{    
-    let b = b(n);
-    
-    // Return in Radians   
-    0.006918 
-    - 0.399912 *  b.cos()     + 0.070257 * b.sin() 
-    - 0.006758 * (2.*b).cos() + 0.000907 * (2.*b).sin() 
-    - 0.002697 * (3.*b).cos() + 0.00148  *(3.*b).sin()
-    
-}
-
-/// Equation 1.4.2 in the Book.
-/// 
-/// n should be in solar time, but this variable does not change daily so
-/// it probably does not matter
-#[inline(always)]
-fn b(n:f64)->f64{
-    (n-1.0)*2.0*std::f64::consts::PI/365.0
-}
 
 impl Solar {
     
-    /// Builds a Solar object from a Standard Time date, a Latitude,
+    /// Builds a Solar object from  a Latitude,
     /// Longitude and Standard meridian (in Radians)
-    pub fn from_standard_time(standard_time: Date, latitude: f64, longitude:f64, standard_meridian:f64) -> Self {
-        let mut n = standard_time.day_of_year();        
-        let delta_minutes = 4.0*in_degrees(standard_meridian-longitude)+equation_of_time(n);
-        
-        // Add the number of minutes divided the number of minutes in a day
-        n += delta_minutes/24./60.;
-        
-
+    pub fn new(latitude: f64, longitude:f64, standard_meridian:f64) -> Self {             
         Self{
-            n,
+            //n,
             latitude,
-            //longitude,
-            //standard_meridian,
+            longitude,
+            standard_meridian,
         }
-    
     }
 
-    /// Builds a Solar object from a Solar Time date and a Latitude 
-    /// (in Radians)
-    pub fn from_solar_time(solar_time: Date, latitude: f64) -> Self {
-        let n = solar_time.day_of_year();        
-        
-        Self{
-            n,
-            latitude,
-            //longitude,
-            //standard_meridian,
-        }
-    
+    /// Returns the difference between the solar and the standard time in minutes
+    pub fn solar_standard_time_difference(&self, n: f64)->f64{
+        4.0*in_degrees(self.standard_meridian-self.longitude)+self.equation_of_time(n)
     }
 
 
+    /// Returns the content of a Time enum. Transforms to Solar
+    /// if the type of the Enum is Standard
+    pub fn unwrap_solar_time(&self, n: Time)->f64{
+        match n {
+            Time::Solar(t)=>{
+                t
+            },
+            Time::Standard(t)=>{                
+                let delta_minutes = self.solar_standard_time_difference(t);                
+                // return the standard time + the number of minutes divided 
+                // the number of minutes in a day
+                t + delta_minutes/24./60.
+            }
+
+        }
+    }
+
+    /// Returns the content of a Time enum. Transforms to Standard
+    /// if the type of the Enum is Solar
+    pub fn unwrap_standard_time(&self, n: Time)->f64{
+        match n {
+            Time::Solar(t)=>{
+                let delta_minutes = self.solar_standard_time_difference(t);                
+                // return the standard time + the number of minutes divided 
+                // the number of minutes in a day
+                t - delta_minutes/24./60.
+            },
+            Time::Standard(t)=>{                
+                t
+            }
+
+        }
+    }
+    
+
+
+    /// The Equation of Time based on the day of year (can have decimals)
+    /// 
+    /// n should be in solar time, but this variable does not change daily so
+    /// it probably does not matter... let's just treat it as f64
+    pub fn equation_of_time(&self, n: f64)->f64{
+        let b = self.b(n);
+        229.2*(0.000075 + 0.001868*b.cos()-0.032077*b.sin() - 0.014615*(2.0*b).cos() - 0.04089*(2.0*b).sin())
+    }
+
+    /// Declination (in Radians), according to Equation 1.6.1B
+    /// 
+    /// n should be in solar time, but this variable does not change daily so
+    /// it probably does not matter... let's just treat it as f64
+    pub fn declination(&self, n:f64)->f64{    
+        let b = self.b(n);
+        
+        // Return in Radians   
+        0.006918 
+        - 0.399912 *  b.cos()     + 0.070257 * b.sin() 
+        - 0.006758 * (2.*b).cos() + 0.000907 * (2.*b).sin() 
+        - 0.002697 * (3.*b).cos() + 0.00148  *(3.*b).sin()
+        
+    }
 
     /// Equation 1.4.2 in the Book.
     /// 
     /// n should be in solar time, but this variable does not change daily so
-    /// it probably does not matter
+    /// it probably does not matter... let's just treat it as f64
     #[inline(always)]
-    fn b(&self)->f64{
-        b(self.n)
+    fn b(&self, n:f64)->f64{
+        (n-1.0)*2.0*std::f64::consts::PI/365.0
     }
+
+    
     
     /// Normal extraterrestrial radiation (Gon)
     /// Equation 1.4.1b from Duffie and Beckman
     /// 
     /// n should be in solar time, but this variable does not change daily so
-    /// it probably does not matter
-    pub fn normal_extraterrestrial_radiation(&self)->f64{
-        let b = self.b();
+    /// it probably does not matter... let's just treat it as f64
+    pub fn normal_extraterrestrial_radiation(&self, n: f64)->f64{
+        let b = self.b(n);
         let aux = 1.000110 + 0.034221 * b.cos() + 0.001280*b.sin()+0.000719*(2.0*b).cos() + 0.000077*(2.0*b).sin();
         SOLAR_CONSTANT*aux
     
     }
         
+   
     
-    /// Declination, according to Equation 1.6.1B
-    /// 
-    /// n should be in solar time, but this variable does not change daily so
-    /// it probably does not matter
-    pub fn declination(&self)->f64{
-        declination(self.n)        
-    }
-    
-    /// Returns the hour angle in degrees
-    /// 
-    /// n should be in solar time
-    pub fn hour_angle(&self)->f64{
+    /// Returns the hour angle in degrees    
+    pub fn hour_angle(&self, n: Time)->f64{
+        let n = self.unwrap_solar_time(n);
+
         // Remove the day (keep the hour)
-        let solar_hour = 24.*(self.n % 1.);
+        let solar_hour = 24.*(n % 1.);
     
         // Multiply for 24 hours, and by 15degrees/hour
         in_radians((solar_hour - 12.)*15.)
@@ -157,16 +169,18 @@ impl Solar {
     /// Builds a vector that points towards the sun.
     /// 
     /// Z is up, Y is North and X is East
-    pub fn sun_position(&self)->Vector3D{
+    pub fn sun_position(&self, n: Time)->Vector3D{
         
+        let n = self.unwrap_solar_time(n);
+
         let cos_phi = self.latitude.cos();
         let sin_phi = self.latitude.sin();
         
-        let delta = self.declination();
+        let delta = self.declination(n);
         let cos_delta = delta.cos();
         let sin_delta = delta.sin();
 
-        let omega = self.hour_angle();
+        let omega = self.hour_angle(Time::Solar(n));
         let cos_omega = omega.cos();
 
         // Equation 1.6.5, for Zenith
@@ -204,6 +218,7 @@ impl Solar {
 mod tests {
 
     use super::*;
+    use calendar::date::Date;
 
     fn are_close(x:f64, y:f64, precision: f64)->bool{
         if (x-y).abs() < precision {
@@ -240,7 +255,7 @@ mod tests {
     }
 
     #[test]
-    fn test_from_standard_time(){        
+    fn test_unwrap_time(){        
         /*
         Example 1.5.1 in Duffie & Beckman
         At Madison, Wisconsin, what is the solar time corresponding to 10:30 AM central time on February 3?
@@ -249,13 +264,25 @@ mod tests {
         */
         let longitude = in_radians(89.4);
         let standard_meridian = in_radians(90.0);
+        let latitude = in_radians(-2.);
+
+        let solar = Solar::new(latitude, longitude, standard_meridian);
+
+        const EPS:f64 = 0.5/60.;// Half a minute precision
+        
+        // Standard to solar
         let standard_time = Date{
             month:2, day: 3, hour:10.5
         };
-        const EPS:f64 = 0.5/60.;// Half a minute precision
-        let solar_time = Solar::from_standard_time(standard_time, 0., longitude, standard_meridian);        
-        let solar_date = Date::from_day_of_year(solar_time.n);
-        assert!(are_close(solar_date.hour, 10.0+19.0/60.0, EPS))
+        let standard_n = standard_time.day_of_year();
+        
+        let solar_n = solar.unwrap_solar_time(Time::Standard(standard_n));
+        let solar_time = Date::from_day_of_year(solar_n);        
+        assert!(are_close(solar_time.hour, 10.0+19.0/60.0, EPS));
+
+        // Solar to standard
+        let standard_n_2 = solar.unwrap_standard_time(Time::Solar(solar_n));
+        assert!(are_close(standard_n, standard_n_2, EPS))
 
     }
 
@@ -263,11 +290,13 @@ mod tests {
     fn test_declination(){
         
         fn check(month:u8, day:u8, expected_n:f64, expected_d: f64){
+            let solar = Solar::new(0.0,0.,0.);
+
             let date = Date{ month: month, day: day, hour: 0. };
             let n = date.day_of_year();
             assert_eq!(n, expected_n - 1.);
 
-            let d = declination(n);
+            let d = solar.declination(n);
 
             println!("exp: {}, found: {}", expected_d, in_degrees(d));
             // I suspect I need this margin of error (1.8 deg.)
@@ -299,24 +328,25 @@ mod tests {
         /*
         10:30 (solar time) on February 13... hour_angle is -22.55
         */
-        let date = Date{
+
+        let solar = Solar::new(0.,0.,0.);
+
+        let n = Date{
             month: 2, day:13, hour:10.5
-        };        
-        let solar = Solar::from_solar_time(date, 0.);
-        let w = in_degrees(solar.hour_angle());
+        }.day_of_year();         
+
+        let w = in_degrees(solar.hour_angle(Time::Solar(n)));
         assert!(are_close(w, -22.5, 0.1));
 
         /* OTHERS */
         // Midday == 0
-        let date = Date{month: 2, day:13, hour:12.0 };        
-        let solar = Solar::from_solar_time(date, 0.);
-        let w = in_degrees(solar.hour_angle());
+        let n = Date{month: 2, day:13, hour:12.0 }.day_of_year();        
+        let w = in_degrees(solar.hour_angle(Time::Solar(n)));
         assert!(are_close(w, 0., 0.1));
 
         // 13:00 == 15
-        let date = Date{month: 2, day:13, hour:13.0 };        
-        let solar = Solar::from_solar_time(date, 0.);
-        let w = in_degrees(solar.hour_angle());
+        let n = Date{month: 2, day:13, hour:13.0 }.day_of_year();                        
+        let w = in_degrees(solar.hour_angle(Time::Solar(n)));
         assert!(are_close(w, 15., 0.1));
     }
 
@@ -330,16 +360,16 @@ mod tests {
 
         // FOR 9:30 AM on February 13
         // ==========================
-        let solar_time = Date{month:2, day:13, hour:9.5};
-        let solar = Solar::from_solar_time(solar_time, phi);
-        let dir = solar.sun_position();
+        let solar = Solar::new(phi,0.,0.);
+        let n = Date{month:2, day:13, hour:9.5}.day_of_year();
+        let dir = solar.sun_position(Time::Solar(n));
         assert!(are_close(dir.length(), 1.0, 0.00001));
 
         // check declination
-        assert!(are_close(in_degrees(solar.declination()), -14., 0.5));
+        assert!(are_close(in_degrees(solar.declination(n)), -14., 0.5));
 
         // check hour angle
-        assert!(are_close(in_degrees(solar.hour_angle()), -37.5, 0.5));
+        assert!(are_close(in_degrees(solar.hour_angle(Time::Solar(n))), -37.5, 0.5));
 
         // zenith
         let zenith = in_degrees(dir.z().acos());
@@ -352,16 +382,15 @@ mod tests {
 
         // 6:30 PM on July 1
         // =================
-        let solar_time = Date{month:7, day:1, hour:18.5};
-        let solar = Solar::from_solar_time(solar_time, phi);
-        let dir = solar.sun_position();
+        let n = Date{month:7, day:1, hour:18.5}.day_of_year();
+        let dir = solar.sun_position(Time::Solar(n));
         assert!(are_close(dir.length(), 1.0, 0.00001));
 
         // check declination
-        assert!(are_close(in_degrees(solar.declination()), 23.1, 0.5));
+        assert!(are_close(in_degrees(solar.declination(n)), 23.1, 0.5));
 
         // check hour angle
-        assert!(are_close(in_degrees(solar.hour_angle()), 97.5, 0.5));
+        assert!(are_close(in_degrees(solar.hour_angle(Time::Solar(n))), 97.5, 0.5));
 
         // zenith
         let zenith = in_degrees(dir.z().acos());
@@ -387,14 +416,14 @@ mod tests {
         */
         // sun direction
         let latitude = in_radians(43.);
-        let solar_time = Date{month:2, day:13, hour:10.5};
-        let solar = Solar::from_solar_time(solar_time, latitude);
-        let solar_dir = solar.sun_position();
+        let solar = Solar::new(latitude, 0.0, 0.0);
+        let n = Date{month:2, day:13, hour:10.5}.day_of_year();        
+        let solar_dir = solar.sun_position(Time::Solar(n));
         // check declination
-        assert!(are_close(in_degrees(solar.declination()), -14., 0.5));
+        assert!(are_close(in_degrees(solar.declination(n)), -14., 0.5));
 
         // check hour angle
-        assert!(are_close(in_degrees(solar.hour_angle()), -22.5, 0.5));
+        assert!(are_close(in_degrees(solar.hour_angle(Time::Solar(n))), -22.5, 0.5));
 
         // surface
         let beta = in_radians(45.);
