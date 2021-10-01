@@ -7,7 +7,7 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-geometry3d = {path= "../geometry3d"}
+geometry3d = { git = "https://github.com/SIMPLE-BuildingSimulation/geometry3d.git" }
 
 [dev-dependencies]
-calendar = {path = "../calendar"}
+calendar = { git = "https://github.com/SIMPLE-BuildingSimulation/calendar.git" }

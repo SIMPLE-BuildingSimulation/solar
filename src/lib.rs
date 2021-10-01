@@ -45,8 +45,12 @@ pub fn in_radians(degrees:f64)->f64{
     degrees * std::f64::consts::PI/180.0
 }
 
+/// Solar or Standard time, containing the day of the year 'n'
 pub enum Time{
+    /// Time is in Solar time
     Solar(f64),
+
+    /// Time is in Standard time
     Standard(f64),
 }
 
@@ -56,8 +60,7 @@ impl Solar {
     /// Builds a Solar object from  a Latitude,
     /// Longitude and Standard meridian (in Radians)
     pub fn new(latitude: f64, longitude:f64, standard_meridian:f64) -> Self {             
-        Self{
-            //n,
+        Self{            
             latitude,
             longitude,
             standard_meridian,
@@ -159,19 +162,43 @@ impl Solar {
     pub fn hour_angle(&self, n: Time)->f64{
         let n = self.unwrap_solar_time(n);
 
-        // Remove the day (keep the hour)
+        // Remove the day (keep the hour). Multiply by 24 hours
         let solar_hour = 24.*(n % 1.);
     
         // Multiply for 24 hours, and by 15degrees/hour
         in_radians((solar_hour - 12.)*15.)
     }
 
+    /// Gets the sunset time (equation 1.6.10)
+    /// n should be in solar time, but since it does not change
+    /// much on a daily basis, we treat it as an f64
+    pub fn sunrise_sunset(&self, n:f64)->(Time, Time){
+        
+        let delta = self.declination(n);        
+        let cos_w = -self.latitude.tan()*delta.tan();        
+        let w = in_degrees(cos_w.acos());        
+        let half_n = w/15.;
+
+        // return
+        let midday = n.floor()+0.5;
+        (Time::Solar(midday-half_n/24.), Time::Solar(midday+half_n/24.))
+
+    }
+
     /// Builds a vector that points towards the sun.
     /// 
     /// Z is up, Y is North and X is East
-    pub fn sun_position(&self, n: Time)->Vector3D{
+    pub fn sun_position(&self, n: Time)->Option<Vector3D>{
         
         let n = self.unwrap_solar_time(n);
+        
+        // if it is night-time, return None
+        let (sunrise, sunset) = self.sunrise_sunset(n);
+        if n < self.unwrap_solar_time(sunrise) || n > self.unwrap_solar_time(sunset){
+            return None
+        }
+
+        // else, calculate stuff
 
         let cos_phi = self.latitude.cos();
         let sin_phi = self.latitude.sin();
@@ -184,20 +211,39 @@ impl Solar {
         let cos_omega = omega.cos();
 
         // Equation 1.6.5, for Zenith
-        let cos_zenith = cos_phi* cos_delta * cos_omega + sin_phi * sin_delta;
+        let cos_zenith = cos_phi* cos_delta * cos_omega + sin_phi * sin_delta;        
         let sin_zenith = cos_zenith.acos().sin();
-        debug_assert!( (1.0-(cos_zenith*cos_zenith + sin_zenith * sin_zenith)).abs() < 0.000001);
-        let z = cos_zenith;        
-
+        if cos_zenith < 0.{
+            // it should be daytime; i.e., zenith < 90 (i.e., cos(zenith)>0)
+            return None
+        } 
+        debug_assert!( (1.0-(cos_zenith*cos_zenith + sin_zenith * sin_zenith)).abs() < 0.000001);        
+        
+        // Is vertical? If so, return vertical... otherwise, carry on.
+        const LIMIT_ANGLE : f64 = 0.9999; // A zenith angle of less than 0.8 degrees (ish) is considered vertical.
+        if cos_zenith > LIMIT_ANGLE {
+            return Some(Vector3D::new(0., 0., 1.));
+        }        
+        let z = cos_zenith;    
+        
         // Equation 1.6.6 for Azimuth
-        let cos_azimuth = (cos_zenith * sin_phi - sin_delta)/(sin_zenith * cos_phi);
+        let mut cos_azimuth = (cos_zenith * sin_phi - sin_delta)/(sin_zenith * cos_phi);         
+        if cos_azimuth > 1.{
+            cos_azimuth = 1.0;
+        }else if cos_azimuth < -1.{
+            cos_azimuth = -1.;
+        }
         let sin_azimuth = cos_azimuth.acos().sin();
+       
         debug_assert!( (1.0-(cos_azimuth*cos_azimuth + sin_azimuth*sin_azimuth)).abs() < 0.0000001 );
-        let y = -cos_azimuth * sin_zenith;
-
+        
+        
         
         // Trigonometry
         let mut x = sin_azimuth * sin_zenith;
+        let y = -cos_azimuth * sin_zenith;
+        
+        
         // (x should be positive at this stage, right? then, if omega is 
         // positive, we need to change the sign of x)
         if omega > 0. {
@@ -208,7 +254,7 @@ impl Solar {
         debug_assert!( ((x*x+y*y+z*z).sqrt()-1.0).abs()< 0.000001);
 
         // Build the vector and return
-        Vector3D::new(x,y,z)
+        Some(Vector3D::new(x,y,z))
     }
 
 } // end of impl Solar
@@ -249,10 +295,7 @@ mod tests {
         assert!(are_close(in_radians(130.0), 2.268928, EPS));
     }
 
-    #[test]
-    fn test_normal_extraterrestrial(){
-        assert!(false)
-    }
+    
 
     #[test]
     fn test_unwrap_time(){        
@@ -362,7 +405,7 @@ mod tests {
         // ==========================
         let solar = Solar::new(phi,0.,0.);
         let n = Date{month:2, day:13, hour:9.5}.day_of_year();
-        let dir = solar.sun_position(Time::Solar(n));
+        let dir = solar.sun_position(Time::Solar(n)).unwrap();
         assert!(are_close(dir.length(), 1.0, 0.00001));
 
         // check declination
@@ -372,18 +415,18 @@ mod tests {
         assert!(are_close(in_degrees(solar.hour_angle(Time::Solar(n))), -37.5, 0.5));
 
         // zenith
-        let zenith = in_degrees(dir.z().acos());
+        let zenith = in_degrees(dir.z.acos());
         assert!(are_close(zenith, 66.5, 0.5));
 
         // Azimuth
-        let azimuth = in_degrees((dir.x()/dir.y()).atan());
+        let azimuth = in_degrees((dir.x/dir.y).atan());
         assert!(are_close(azimuth, -40., 0.5));
 
 
         // 6:30 PM on July 1
         // =================
         let n = Date{month:7, day:1, hour:18.5}.day_of_year();
-        let dir = solar.sun_position(Time::Solar(n));
+        let dir = solar.sun_position(Time::Solar(n)).unwrap();
         assert!(are_close(dir.length(), 1.0, 0.00001));
 
         // check declination
@@ -393,15 +436,14 @@ mod tests {
         assert!(are_close(in_degrees(solar.hour_angle(Time::Solar(n))), 97.5, 0.5));
 
         // zenith
-        let zenith = in_degrees(dir.z().acos());
+        let zenith = in_degrees(dir.z.acos());
         assert!(are_close(zenith, 79.6, 0.5));
 
         // Azimuth
         println!("{}", dir);
-        let azimuth = in_degrees((dir.x()/dir.y()).atan());
+        let _azimuth = in_degrees((dir.x/dir.y).atan());
         //assert!(are_close(azimuth, 112., 0.5)); // This is working, but atan() returns -67 instead of 112
 
-        
     }
 
 
@@ -418,7 +460,7 @@ mod tests {
         let latitude = in_radians(43.);
         let solar = Solar::new(latitude, 0.0, 0.0);
         let n = Date{month:2, day:13, hour:10.5}.day_of_year();        
-        let solar_dir = solar.sun_position(Time::Solar(n));
+        let solar_dir = solar.sun_position(Time::Solar(n)).unwrap();
         // check declination
         assert!(are_close(in_degrees(solar.declination(n)), -14., 0.5));
 
@@ -440,6 +482,32 @@ mod tests {
         assert!(are_close(in_degrees(angle), 35., 0.2));
 
 
+    }
+
+    #[test]
+    fn test_sunrise_sunset(){
+        /*
+        Example 1.6.3
+        Calculate the time of sunrise... at 4:00 PM solar time on March 16 at 
+        a latitude of 43◦. 
+        
+        Solution:
+
+        The sunrise hour angle is therefore −87.8◦. 
+        With the earth’s rotation of 15◦ per hour, sunrise (and sunset) occurs 
+        5.85 h (5 h and 51 min) from noon so sunrise is at 6:09 AM (and sunset 
+        is at 5:51 PM).
+        */
+        let latitude = in_radians(43.);
+        let solar = Solar::new(latitude, 0., 0.);        
+        let date = Date{
+            month: 3, day:16, hour:16.
+        };        
+        let n = date.day_of_year();         
+        let n_midday = n.floor()+0.5;
+        let (rise, set) = solar.sunrise_sunset(n);
+        are_close(n_midday - 5.85/24., solar.unwrap_solar_time(rise), 1./24./60.);// one minute
+        are_close(n_midday + 5.85/24., solar.unwrap_solar_time(set), 1./24./60.);// one minute
     }
     
 }
