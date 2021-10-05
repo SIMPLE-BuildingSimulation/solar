@@ -11,3 +11,8 @@ geometry3d = { git = "https://github.com/SIMPLE-BuildingSimulation/geometry3d.gi
 
 [dev-dependencies]
 calendar = { git = "https://github.com/SIMPLE-BuildingSimulation/calendar.git" }
+
+
+[features]
+default = []
+float = ["geometry3d/float", "calendar/float"]

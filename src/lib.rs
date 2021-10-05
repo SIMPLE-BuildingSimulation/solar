@@ -1,5 +1,23 @@
 use geometry3d::vector3d::Vector3D;
 
+
+
+/// The kind of Floating point number used in the
+/// library... the `"float"` feature means it becomes `f32`
+/// and `f64` is used otherwise.
+#[cfg(feature = "float")]
+type Float = f32;
+
+#[cfg(not(feature = "float"))]
+type Float = f64;
+
+#[cfg(feature = "float")]
+const PI : Float = std::f32::consts::PI;
+
+#[cfg(not(feature = "float"))]
+const PI : Float = std::f64::consts::PI;
+
+
 /// Solar calculations library. Based on Duffie and Beckman's excellent book.
 /// 
 /// We follow the convention of the book. This means that everything is in 
@@ -18,40 +36,40 @@ use geometry3d::vector3d::Vector3D;
 /// standard time
 pub struct Solar {
     // Day of the year
-    //n: f64,
+    //n: Float,
 
     /// Latitude in Radians
-    latitude: f64,
+    latitude: Float,
 
     /// Longitude (in Radians)
-    longitude:f64,
+    longitude:Float,
 
     /// Standard meridian (in Radians)
-    standard_meridian: f64,
+    standard_meridian: Float,
 }
 
 /// W/m2
-const SOLAR_CONSTANT : f64 = 1367.0; 
+const SOLAR_CONSTANT : Float = 1367.0; 
 
 /// Converts Radians into Degrees
 #[inline(always)]
-pub fn in_degrees(rad:f64) -> f64 {
-    rad * 180.0/std::f64::consts::PI
+pub fn in_degrees(rad:Float) -> Float {
+    rad * 180.0/PI
 }
 
 /// Converts degrees into Radians
 #[inline(always)]
-pub fn in_radians(degrees:f64)->f64{
-    degrees * std::f64::consts::PI/180.0
+pub fn in_radians(degrees:Float)->Float{
+    degrees * PI/180.0
 }
 
 /// Solar or Standard time, containing the day of the year 'n'
 pub enum Time{
     /// Time is in Solar time
-    Solar(f64),
+    Solar(Float),
 
     /// Time is in Standard time
-    Standard(f64),
+    Standard(Float),
 }
 
 
@@ -59,7 +77,7 @@ impl Solar {
     
     /// Builds a Solar object from  a Latitude,
     /// Longitude and Standard meridian (in Radians)
-    pub fn new(latitude: f64, longitude:f64, standard_meridian:f64) -> Self {             
+    pub fn new(latitude: Float, longitude:Float, standard_meridian:Float) -> Self {             
         Self{            
             latitude,
             longitude,
@@ -68,14 +86,14 @@ impl Solar {
     }
 
     /// Returns the difference between the solar and the standard time in minutes
-    pub fn solar_standard_time_difference(&self, n: f64)->f64{
+    pub fn solar_standard_time_difference(&self, n: Float)->Float{
         4.0*in_degrees(self.standard_meridian-self.longitude)+self.equation_of_time(n)
     }
 
 
     /// Returns the content of a Time enum. Transforms to Solar
     /// if the type of the Enum is Standard
-    pub fn unwrap_solar_time(&self, n: Time)->f64{
+    pub fn unwrap_solar_time(&self, n: Time)->Float{
         match n {
             Time::Solar(t)=>{
                 t
@@ -92,7 +110,7 @@ impl Solar {
 
     /// Returns the content of a Time enum. Transforms to Standard
     /// if the type of the Enum is Solar
-    pub fn unwrap_standard_time(&self, n: Time)->f64{
+    pub fn unwrap_standard_time(&self, n: Time)->Float{
         match n {
             Time::Solar(t)=>{
                 let delta_minutes = self.solar_standard_time_difference(t);                
@@ -112,8 +130,8 @@ impl Solar {
     /// The Equation of Time based on the day of year (can have decimals)
     /// 
     /// n should be in solar time, but this variable does not change daily so
-    /// it probably does not matter... let's just treat it as f64
-    pub fn equation_of_time(&self, n: f64)->f64{
+    /// it probably does not matter... let's just treat it as Float
+    pub fn equation_of_time(&self, n: Float)->Float{
         let b = self.b(n);
         229.2*(0.000075 + 0.001868*b.cos()-0.032077*b.sin() - 0.014615*(2.0*b).cos() - 0.04089*(2.0*b).sin())
     }
@@ -121,8 +139,8 @@ impl Solar {
     /// Declination (in Radians), according to Equation 1.6.1B
     /// 
     /// n should be in solar time, but this variable does not change daily so
-    /// it probably does not matter... let's just treat it as f64
-    pub fn declination(&self, n:f64)->f64{    
+    /// it probably does not matter... let's just treat it as Float
+    pub fn declination(&self, n:Float)->Float{    
         let b = self.b(n);
         
         // Return in Radians   
@@ -136,10 +154,10 @@ impl Solar {
     /// Equation 1.4.2 in the Book.
     /// 
     /// n should be in solar time, but this variable does not change daily so
-    /// it probably does not matter... let's just treat it as f64
+    /// it probably does not matter... let's just treat it as Float
     #[inline(always)]
-    fn b(&self, n:f64)->f64{
-        (n-1.0)*2.0*std::f64::consts::PI/365.0
+    fn b(&self, n:Float)->Float{
+        (n-1.0)*2.0*PI/365.0
     }
 
     
@@ -148,8 +166,8 @@ impl Solar {
     /// Equation 1.4.1b from Duffie and Beckman
     /// 
     /// n should be in solar time, but this variable does not change daily so
-    /// it probably does not matter... let's just treat it as f64
-    pub fn normal_extraterrestrial_radiation(&self, n: f64)->f64{
+    /// it probably does not matter... let's just treat it as Float
+    pub fn normal_extraterrestrial_radiation(&self, n: Float)->Float{
         let b = self.b(n);
         let aux = 1.000110 + 0.034221 * b.cos() + 0.001280*b.sin()+0.000719*(2.0*b).cos() + 0.000077*(2.0*b).sin();
         SOLAR_CONSTANT*aux
@@ -159,7 +177,7 @@ impl Solar {
    
     
     /// Returns the hour angle in degrees    
-    pub fn hour_angle(&self, n: Time)->f64{
+    pub fn hour_angle(&self, n: Time)->Float{
         let n = self.unwrap_solar_time(n);
 
         // Remove the day (keep the hour). Multiply by 24 hours
@@ -171,8 +189,8 @@ impl Solar {
 
     /// Gets the sunset time (equation 1.6.10)
     /// n should be in solar time, but since it does not change
-    /// much on a daily basis, we treat it as an f64
-    pub fn sunrise_sunset(&self, n:f64)->(Time, Time){
+    /// much on a daily basis, we treat it as an Float
+    pub fn sunrise_sunset(&self, n:Float)->(Time, Time){
         
         let delta = self.declination(n);        
         let cos_w = -self.latitude.tan()*delta.tan();        
@@ -220,7 +238,7 @@ impl Solar {
         debug_assert!( (1.0-(cos_zenith*cos_zenith + sin_zenith * sin_zenith)).abs() < 0.000001);        
         
         // Is vertical? If so, return vertical... otherwise, carry on.
-        const LIMIT_ANGLE : f64 = 0.9999; // A zenith angle of less than 0.8 degrees (ish) is considered vertical.
+        const LIMIT_ANGLE : Float = 0.9999; // A zenith angle of less than 0.8 degrees (ish) is considered vertical.
         if cos_zenith > LIMIT_ANGLE {
             return Some(Vector3D::new(0., 0., 1.));
         }        
@@ -266,7 +284,7 @@ mod tests {
     use super::*;
     use calendar::date::Date;
 
-    fn are_close(x:f64, y:f64, precision: f64)->bool{
+    fn are_close(x:Float, y:Float, precision: Float)->bool{
         if (x-y).abs() < precision {
             return true
         }
@@ -284,13 +302,13 @@ mod tests {
 
         
         // Conversions from rad to degree
-        const EPS : f64 = 0.0001;
+        const EPS : Float = 0.0001;
         assert!(are_close(in_degrees(1.0), 57.29578, EPS));
         assert!(are_close(in_degrees(1.45), 83.07888, EPS));
-        assert!(are_close(in_degrees(std::f64::consts::PI), 180.0, EPS));
+        assert!(are_close(in_degrees(PI), 180.0, EPS));
 
         // Conversions from degree to rad
-        assert!(are_close(in_radians(180.0), std::f64::consts::PI, EPS));
+        assert!(are_close(in_radians(180.0), PI, EPS));
         assert!(are_close(in_radians(230.0), 4.014257, EPS));
         assert!(are_close(in_radians(130.0), 2.268928, EPS));
     }
@@ -311,7 +329,7 @@ mod tests {
 
         let solar = Solar::new(latitude, longitude, standard_meridian);
 
-        const EPS:f64 = 0.5/60.;// Half a minute precision
+        const EPS:Float = 0.5/60.;// Half a minute precision
         
         // Standard to solar
         let standard_time = Date{
@@ -332,7 +350,7 @@ mod tests {
     #[test]
     fn test_declination(){
         
-        fn check(month:u8, day:u8, expected_n:f64, expected_d: f64){
+        fn check(month:u8, day:u8, expected_n:Float, expected_d: Float){
             let solar = Solar::new(0.0,0.,0.);
 
             let date = Date{ month: month, day: day, hour: 0. };
