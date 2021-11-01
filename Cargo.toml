@@ -15,4 +15,4 @@ calendar = { git = "https://github.com/SIMPLE-BuildingSimulation/calendar.git" }
 
 [features]
 default = []
-float = ["geometry3d/float", "calendar/float"]
+float = ["geometry3d/float"]
