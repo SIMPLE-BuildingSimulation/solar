@@ -17,4 +17,4 @@ weather = {git = "https://github.com/SIMPLE-BuildingSimulation/weather.git" }
 
 [features]
 default = []
-float = ["geometry3d/float", "calendar/float", "matrix/float"]
+float = ["weather/float", "geometry3d/float", "calendar/float", "matrix/float"]

@@ -9,3 +9,5 @@ An implementation of the equations available Duffie and Beckman's "Solar Enginee
 
 Also included an implementation of Reinhart's sky subdivition scheme, 
 commonly used for Climate Based Daylight Modelling.
+
+Check documentation [HERE](https://simple-buildingsimulation.github.io/solar/)
