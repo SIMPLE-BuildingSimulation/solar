@@ -1297,6 +1297,31 @@
 <span id="1263">1263</span>
 <span id="1264">1264</span>
 <span id="1265">1265</span>
+<span id="1266">1266</span>
+<span id="1267">1267</span>
+<span id="1268">1268</span>
+<span id="1269">1269</span>
+<span id="1270">1270</span>
+<span id="1271">1271</span>
+<span id="1272">1272</span>
+<span id="1273">1273</span>
+<span id="1274">1274</span>
+<span id="1275">1275</span>
+<span id="1276">1276</span>
+<span id="1277">1277</span>
+<span id="1278">1278</span>
+<span id="1279">1279</span>
+<span id="1280">1280</span>
+<span id="1281">1281</span>
+<span id="1282">1282</span>
+<span id="1283">1283</span>
+<span id="1284">1284</span>
+<span id="1285">1285</span>
+<span id="1286">1286</span>
+<span id="1287">1287</span>
+<span id="1288">1288</span>
+<span id="1289">1289</span>
+<span id="1290">1290</span>
 </pre><pre class="rust"><code><span class="comment">/*
 MIT License
 Copyright (c) 2021 Germán Molina
@@ -1329,6 +1354,8 @@ SOFTWARE.
 <span class="doccomment">/// i.e., altitude of 0.0, to top, i.e., alt. of almost 90 deg)</span>
 <span class="doccomment">/// plus a Cap at the top.</span>
 <span class="kw">const</span> <span class="ident">TNAZ</span>: [<span class="ident">usize</span>; <span class="number">7</span>] <span class="op">=</span> [<span class="number">30</span>, <span class="number">30</span>, <span class="number">24</span>, <span class="number">24</span>, <span class="number">18</span>, <span class="number">12</span>, <span class="number">6</span>];
+
+
 
 <span class="doccomment">/// Calculates the solid angle of a Cone.</span>
 <span class="kw">fn</span> <span class="ident">cone_solid_angle</span>(<span class="ident">angle</span>: <span class="ident">Float</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Float</span> {
@@ -1392,6 +1419,22 @@ SOFTWARE.
 }
 
 <span class="kw">impl</span> <span class="ident">ReinhartSky</span> {
+    <span class="doccomment">/// Calculates the number of total bins in a Reinhart&#39;s discretization</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">n_bins</span>(<span class="ident">mf</span>: <span class="ident">usize</span>)<span class="op">-</span><span class="op">&gt;</span><span class="ident">usize</span>{
+
+
+        <span class="kw">fn</span> <span class="ident">raccum</span> (<span class="ident">mf</span>: <span class="ident">usize</span>, <span class="ident">row</span>: <span class="ident">usize</span>)<span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+            <span class="kw">if</span> <span class="ident">row</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+                <span class="number">0</span>
+            }<span class="kw">else</span>{
+                <span class="ident">bins_in_row</span>(<span class="ident">mf</span>, <span class="ident">row</span> <span class="op">-</span> <span class="number">1</span>) <span class="op">+</span> <span class="ident">raccum</span>(<span class="ident">mf</span>, <span class="ident">row</span><span class="op">-</span><span class="number">1</span>)
+            }
+        }
+
+        
+        <span class="ident">raccum</span>(<span class="ident">mf</span>, <span class="number">7</span><span class="kw-2">*</span><span class="ident">mf</span><span class="op">+</span><span class="number">1</span>) <span class="op">+</span> <span class="number">1</span>
+    }
+
     <span class="doccomment">/// Calculates the row in which a certain bin is located</span>
     <span class="kw">fn</span> <span class="ident">bins_row</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">nbin</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
         <span class="kw">if</span> <span class="ident">nbin</span> <span class="op">&gt;</span> <span class="self">self</span>.<span class="ident">n_bins</span> {
@@ -1782,12 +1825,19 @@ SOFTWARE.
     <span class="kw">fn</span> <span class="ident">test_n_bins</span>() {
         <span class="kw">let</span> <span class="ident">r</span> <span class="op">=</span> <span class="ident">ReinhartSky::new</span>(<span class="number">1</span>);
         <span class="macro">assert_eq!</span>(<span class="ident">r</span>.<span class="ident">n_bins</span>, <span class="number">146</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">ReinhartSky::n_bins</span>(<span class="number">1</span>), <span class="number">146</span>);
+
         <span class="kw">let</span> <span class="ident">r</span> <span class="op">=</span> <span class="ident">ReinhartSky::new</span>(<span class="number">2</span>);
         <span class="macro">assert_eq!</span>(<span class="ident">r</span>.<span class="ident">n_bins</span>, <span class="number">578</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">ReinhartSky::n_bins</span>(<span class="number">2</span>), <span class="number">578</span>);
+
         <span class="kw">let</span> <span class="ident">r</span> <span class="op">=</span> <span class="ident">ReinhartSky::new</span>(<span class="number">3</span>);
         <span class="macro">assert_eq!</span>(<span class="ident">r</span>.<span class="ident">n_bins</span>, <span class="number">1298</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">ReinhartSky::n_bins</span>(<span class="number">3</span>), <span class="number">1298</span>);
+
         <span class="kw">let</span> <span class="ident">r</span> <span class="op">=</span> <span class="ident">ReinhartSky::new</span>(<span class="number">4</span>);
         <span class="macro">assert_eq!</span>(<span class="ident">r</span>.<span class="ident">n_bins</span>, <span class="number">2306</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">ReinhartSky::n_bins</span>(<span class="number">4</span>), <span class="number">2306</span>);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
