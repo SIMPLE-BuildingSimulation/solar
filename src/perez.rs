@@ -19,8 +19,8 @@ SOFTWARE.
 */
 
 const WHTEFFICACY: Float = 179.;
-use crate::{Float, PI};
 use crate::*;
+use crate::{Float, PI};
 use calendar::Date;
 use geometry3d::Vector3D;
 use matrix::Matrix;
@@ -361,14 +361,25 @@ impl PerezSky {
         Box::new(move |dir: Vector3D| -> Float { ret(dir) * norm_diff_illum })
     }
 
-    pub fn gen_sky_vec(mf: usize, solar: &Solar, date: Date, weather_data: CurrentWeather)->Result<Matrix, String>{
+    pub fn gen_sky_vec(
+        mf: usize,
+        solar: &Solar,
+        date: Date,
+        weather_data: CurrentWeather,
+    ) -> Result<Matrix, String> {
         let r = ReinhartSky::new(mf);
         let mut vec = Matrix::new(0.0, r.n_bins, 1);
         Self::update_sky_vec(&mut vec, mf, solar, date, weather_data)?;
         Ok(vec)
     }
 
-    pub fn update_sky_vec(vec : &mut Matrix, mf : usize, solar: &Solar, date: Date, weather_data: CurrentWeather)-> Result<(),String>{
+    pub fn update_sky_vec(
+        vec: &mut Matrix,
+        mf: usize,
+        solar: &Solar,
+        date: Date,
+        weather_data: CurrentWeather,
+    ) -> Result<(), String> {
         let add_sky = true;
         let units = SkyUnits::Visible;
 
@@ -376,34 +387,51 @@ impl PerezSky {
         let (rows, cols) = vec.size();
         debug_assert_eq!(cols, 1);
         if rows != r.n_bins {
-            return Err(format!("when update_sky_vec() : number of elements of input vector ({}) does not match the number of bins for the Reinhart subdivition (MF {} require {} bins)", rows, mf, r.n_bins))
+            return Err(format!("when update_sky_vec() : number of elements of input vector ({}) does not match the number of bins for the Reinhart subdivition (MF {} require {} bins)", rows, mf, r.n_bins));
         }
 
-
-        let dew_point = match weather_data.dew_point_temperature{
-            None => return Err(format!("Weather data needs dew point temperature for calculating sky-vec")),
-            Some(v)=>v
+        let dew_point = match weather_data.dew_point_temperature {
+            None => {
+                return Err(format!(
+                    "Weather data needs dew point temperature for calculating sky-vec"
+                ))
+            }
+            Some(v) => v,
         };
-        let diffuse_horizontal_irrad = match weather_data.diffuse_horizontal_radiation{
-            None => return Err(format!("Weather data needs diffuse_horizontal_radiation for calculating sky-vec")),
-            Some(v)=>v
+        let diffuse_horizontal_irrad = match weather_data.diffuse_horizontal_radiation {
+            None => {
+                return Err(format!(
+                    "Weather data needs diffuse_horizontal_radiation for calculating sky-vec"
+                ))
+            }
+            Some(v) => v,
         };
-        let direct_normal_irrad = match weather_data.direct_normal_radiation{
-            None => return Err(format!("Weather data needs direct_normal_radiation for calculating sky-vec")),
-            Some(v)=>v
+        let direct_normal_irrad = match weather_data.direct_normal_radiation {
+            None => {
+                return Err(format!(
+                    "Weather data needs direct_normal_radiation for calculating sky-vec"
+                ))
+            }
+            Some(v) => v,
         };
 
         if add_sky {
-            let sky_func = Self::get_sky_func_standard_time(units, &solar, date, dew_point, diffuse_horizontal_irrad, direct_normal_irrad);
-            for bin in 0..r.n_bins{
+            let sky_func = Self::get_sky_func_standard_time(
+                units,
+                &solar,
+                date,
+                dew_point,
+                diffuse_horizontal_irrad,
+                direct_normal_irrad,
+            );
+            for bin in 0..r.n_bins {
                 let dir = r.bin_dir(bin);
                 let v = sky_func(dir);
-                vec.set(bin,0, v)?;
+                vec.set(bin, 0, v)?;
             }
         }
         // Return
         Ok(())
-
     }
 }
 
@@ -413,24 +441,23 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_gen_sky_vec(){
-        
+    fn test_gen_sky_vec() {
         let mf = 1;
-        let lat = -41.3 * PI/180.;
-        let lon = -174.78 * PI/180.;
-        let std_mer = -180. * PI/180.;
+        let lat = -41.3 * PI / 180.;
+        let lon = -174.78 * PI / 180.;
+        let std_mer = -180. * PI / 180.;
         let month = 1;
         let day = 1;
         let hour = 5.5;
-        let date = Date{month, day, hour};
+        let date = Date { month, day, hour };
         let solar = Solar::new(lat, lon, std_mer);
-        
-        let weather_data = CurrentWeather{
-            dew_point_temperature : Some(11.),
-            direct_normal_radiation : Some(51.),
+
+        let weather_data = CurrentWeather {
+            dew_point_temperature: Some(11.),
+            direct_normal_radiation: Some(51.),
             diffuse_horizontal_radiation: Some(36.),
 
-            .. CurrentWeather::default()
+            ..CurrentWeather::default()
         };
 
         let vec = PerezSky::gen_sky_vec(mf, &solar, date, weather_data).unwrap();
