@@ -31,6 +31,8 @@ use geometry3d::Vector3D;
 /// plus a Cap at the top.
 const TNAZ: [usize; 7] = [30, 30, 24, 24, 18, 12, 6];
 
+
+
 /// Calculates the solid angle of a Cone.
 fn cone_solid_angle(angle: Float) -> Float {
     2.0 * PI * (1. - angle.cos())
@@ -93,6 +95,22 @@ pub struct ReinhartSky {
 }
 
 impl ReinhartSky {
+    /// Calculates the number of total bins in a Reinhart's discretization
+    pub fn n_bins(mf: usize)->usize{
+
+
+        fn raccum (mf: usize, row: usize)-> usize {
+            if row == 0 {
+                0
+            }else{
+                bins_in_row(mf, row - 1) + raccum(mf, row-1)
+            }
+        }
+
+        
+        raccum(mf, 7*mf+1) + 1
+    }
+
     /// Calculates the row in which a certain bin is located
     fn bins_row(&self, nbin: usize) -> usize {
         if nbin > self.n_bins {
@@ -483,12 +501,19 @@ mod tests {
     fn test_n_bins() {
         let r = ReinhartSky::new(1);
         assert_eq!(r.n_bins, 146);
+        assert_eq!(ReinhartSky::n_bins(1), 146);
+
         let r = ReinhartSky::new(2);
         assert_eq!(r.n_bins, 578);
+        assert_eq!(ReinhartSky::n_bins(2), 578);
+
         let r = ReinhartSky::new(3);
         assert_eq!(r.n_bins, 1298);
+        assert_eq!(ReinhartSky::n_bins(3), 1298);
+
         let r = ReinhartSky::new(4);
         assert_eq!(r.n_bins, 2306);
+        assert_eq!(ReinhartSky::n_bins(4), 2306);
     }
 
     #[test]
