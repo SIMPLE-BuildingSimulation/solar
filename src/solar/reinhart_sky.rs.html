@@ -4034,6 +4034,7 @@
 <span id="4000">4000</span>
 <span id="4001">4001</span>
 <span id="4002">4002</span>
+<span id="4003">4003</span>
 </pre><pre class="rust"><code><span class="comment">/*
 MIT License
 Copyright (c) 2021 Germán Molina
@@ -4234,6 +4235,10 @@ SOFTWARE.
     <span class="doccomment">/// E.g., gets the `x` and `y` components of a vector pointing</span>
     <span class="doccomment">/// to the Sky and returns the bin pointed within that row</span>
     <span class="kw">fn</span> <span class="ident">xy_to_bin</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">row</span>: <span class="ident">usize</span>, <span class="ident">x</span>: <span class="ident">Float</span>, <span class="ident">y</span>: <span class="ident">Float</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+        <span class="comment">// If it is the cap, don&#39;t think about it and return 1</span>
+        <span class="kw">if</span> <span class="ident">row</span> <span class="op">=</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">n_rows</span> {
+            <span class="kw">return</span> <span class="number">1</span>;
+        }
         <span class="comment">// Get the angle in Radians</span>
         <span class="comment">// atan(x/y), not atan(y/x) because azimuth 0 is pointing towards Y</span>
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">azimuth</span> <span class="op">=</span> <span class="ident">x</span>.<span class="ident">atan2</span>(<span class="ident">y</span>);
@@ -4241,17 +4246,14 @@ SOFTWARE.
             <span class="ident">azimuth</span> <span class="op">+</span><span class="op">=</span> <span class="number">2.</span> <span class="op">*</span> <span class="ident">PI</span>;
         }
 
-        <span class="comment">// If it is the cap, don&#39;t think about it and return 1</span>
-        <span class="kw">if</span> <span class="ident">row</span> <span class="op">=</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">n_rows</span> {
-            <span class="kw">return</span> <span class="number">1</span>;
-        }
 
         <span class="comment">// Size of a Bin in Radians</span>
-        <span class="kw">let</span> <span class="ident">bin_size</span> <span class="op">=</span> <span class="number">2.</span> <span class="op">*</span> <span class="ident">PI</span> <span class="op">/</span> <span class="ident">bins_in_row</span>(<span class="self">self</span>.<span class="ident">mf</span>, <span class="ident">row</span>) <span class="kw">as</span> <span class="ident">Float</span>;
+        <span class="kw">let</span> <span class="ident">in_row</span> <span class="op">=</span> <span class="ident">bins_in_row</span>(<span class="self">self</span>.<span class="ident">mf</span>, <span class="ident">row</span>);
+        <span class="kw">let</span> <span class="ident">bin_size</span> <span class="op">=</span> <span class="number">2.</span> <span class="op">*</span> <span class="ident">PI</span> <span class="op">/</span> <span class="ident">in_row</span> <span class="kw">as</span> <span class="ident">Float</span>;
 
         <span class="comment">// Y direction points towards the centre of the first patch...</span>
         <span class="comment">// so we need to add Half a bin size.</span>
-        ((<span class="ident">azimuth</span> <span class="op">+</span> <span class="ident">bin_size</span> <span class="op">/</span> <span class="number">2.</span>) <span class="op">/</span> <span class="ident">bin_size</span>).<span class="ident">floor</span>() <span class="kw">as</span> <span class="ident">usize</span>
+        ((<span class="ident">azimuth</span> <span class="op">+</span> <span class="ident">bin_size</span> <span class="op">/</span> <span class="number">2.</span>) <span class="op">/</span> <span class="ident">bin_size</span>).<span class="ident">floor</span>() <span class="kw">as</span> <span class="ident">usize</span> <span class="op">%</span> <span class="ident">in_row</span>
     }
 
     <span class="doccomment">/// Returns the bin number pointed by direction `dir`</span>
