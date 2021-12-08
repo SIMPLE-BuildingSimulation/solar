@@ -198,6 +198,10 @@ impl ReinhartSky {
     /// E.g., gets the `x` and `y` components of a vector pointing
     /// to the Sky and returns the bin pointed within that row
     fn xy_to_bin(&self, row: usize, x: Float, y: Float) -> usize {
+        // If it is the cap, don't think about it and return 1
+        if row == self.n_rows {
+            return 1;
+        }
         // Get the angle in Radians
         // atan(x/y), not atan(y/x) because azimuth 0 is pointing towards Y
         let mut azimuth = x.atan2(y);
@@ -205,17 +209,14 @@ impl ReinhartSky {
             azimuth += 2. * PI;
         }
 
-        // If it is the cap, don't think about it and return 1
-        if row == self.n_rows {
-            return 1;
-        }
 
         // Size of a Bin in Radians
-        let bin_size = 2. * PI / bins_in_row(self.mf, row) as Float;
+        let in_row = bins_in_row(self.mf, row);
+        let bin_size = 2. * PI / in_row as Float;
 
         // Y direction points towards the centre of the first patch...
         // so we need to add Half a bin size.
-        ((azimuth + bin_size / 2.) / bin_size).floor() as usize
+        ((azimuth + bin_size / 2.) / bin_size).floor() as usize % in_row
     }
 
     /// Returns the bin number pointed by direction `dir`
