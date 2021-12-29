@@ -671,7 +671,7 @@ SOFTWARE.
 <span class="doccomment">/// This is not the same as equation 1.5.1 of the book, as</span>
 <span class="doccomment">/// we are using the approach utilized by Radiance&#39;s source code. The two equations</span>
 <span class="doccomment">/// differ only in large zolar zeniths angles (e.g., close to 90 degrees)</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">air_mass</span>(<span class="ident">solar_zenith</span>: <span class="ident">Float</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Float</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">air_mass</span>(<span class="ident">solar_zenith</span>: <span class="ident">Float</span>) -&gt; <span class="ident">Float</span> {
     <span class="number">1.</span> <span class="op">/</span> (<span class="ident">solar_zenith</span>.<span class="ident">cos</span>() <span class="op">+</span> <span class="number">0.15</span> <span class="op">*</span> (<span class="number">93.885</span> <span class="op">-</span> <span class="ident">in_degrees</span>(<span class="ident">solar_zenith</span>)).<span class="ident">powf</span>(<span class="op">-</span><span class="number">1.253</span>))
 }
 
@@ -709,13 +709,13 @@ SOFTWARE.
 
 <span class="doccomment">/// Converts Radians into Degrees</span>
 <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">in_degrees</span>(<span class="ident">rad</span>: <span class="ident">Float</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Float</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">in_degrees</span>(<span class="ident">rad</span>: <span class="ident">Float</span>) -&gt; <span class="ident">Float</span> {
     <span class="ident">rad</span> <span class="op">*</span> <span class="number">180.0</span> <span class="op">/</span> <span class="ident">PI</span>
 }
 
 <span class="doccomment">/// Converts degrees into Radians</span>
 <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">in_radians</span>(<span class="ident">degrees</span>: <span class="ident">Float</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Float</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">in_radians</span>(<span class="ident">degrees</span>: <span class="ident">Float</span>) -&gt; <span class="ident">Float</span> {
     <span class="ident">degrees</span> <span class="op">*</span> <span class="ident">PI</span> <span class="op">/</span> <span class="number">180.0</span>
 }
 
@@ -732,7 +732,7 @@ SOFTWARE.
 <span class="kw">impl</span> <span class="ident">Solar</span> {
     <span class="doccomment">/// Builds a Solar object from  a Latitude,</span>
     <span class="doccomment">/// Longitude and Standard meridian (in Radians)</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">latitude</span>: <span class="ident">Float</span>, <span class="ident">longitude</span>: <span class="ident">Float</span>, <span class="ident">standard_meridian</span>: <span class="ident">Float</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">latitude</span>: <span class="ident">Float</span>, <span class="ident">longitude</span>: <span class="ident">Float</span>, <span class="ident">standard_meridian</span>: <span class="ident">Float</span>) -&gt; <span class="self">Self</span> {
         <span class="self">Self</span> {
             <span class="ident">latitude</span>,
             <span class="ident">longitude</span>,
@@ -741,16 +741,16 @@ SOFTWARE.
     }
 
     <span class="doccomment">/// Returns the difference between the solar and the standard time in minutes</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">solar_standard_time_difference</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">n</span>: <span class="ident">Float</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Float</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">solar_standard_time_difference</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">n</span>: <span class="ident">Float</span>) -&gt; <span class="ident">Float</span> {
         <span class="number">4.0</span> <span class="op">*</span> <span class="ident">in_degrees</span>(<span class="self">self</span>.<span class="ident">standard_meridian</span> <span class="op">-</span> <span class="self">self</span>.<span class="ident">longitude</span>) <span class="op">+</span> <span class="self">self</span>.<span class="ident">equation_of_time</span>(<span class="ident">n</span>)
     }
 
     <span class="doccomment">/// Returns the content of a Time enum. Transforms to Solar</span>
     <span class="doccomment">/// if the type of the Enum is Standard</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">unwrap_solar_time</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">n</span>: <span class="ident">Time</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Float</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">unwrap_solar_time</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">n</span>: <span class="ident">Time</span>) -&gt; <span class="ident">Float</span> {
         <span class="kw">match</span> <span class="ident">n</span> {
-            <span class="ident">Time::Solar</span>(<span class="ident">t</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">t</span>,
-            <span class="ident">Time::Standard</span>(<span class="ident">t</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">Time::Solar</span>(<span class="ident">t</span>) =&gt; <span class="ident">t</span>,
+            <span class="ident">Time::Standard</span>(<span class="ident">t</span>) =&gt; {
                 <span class="kw">let</span> <span class="ident">delta_minutes</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">solar_standard_time_difference</span>(<span class="ident">t</span>);
                 <span class="comment">// return the standard time + the number of minutes divided</span>
                 <span class="comment">// the number of minutes in a day</span>
@@ -761,15 +761,15 @@ SOFTWARE.
 
     <span class="doccomment">/// Returns the content of a Time enum. Transforms to Standard</span>
     <span class="doccomment">/// if the type of the Enum is Solar</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">unwrap_standard_time</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">n</span>: <span class="ident">Time</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Float</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">unwrap_standard_time</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">n</span>: <span class="ident">Time</span>) -&gt; <span class="ident">Float</span> {
         <span class="kw">match</span> <span class="ident">n</span> {
-            <span class="ident">Time::Solar</span>(<span class="ident">t</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">Time::Solar</span>(<span class="ident">t</span>) =&gt; {
                 <span class="kw">let</span> <span class="ident">delta_minutes</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">solar_standard_time_difference</span>(<span class="ident">t</span>);
                 <span class="comment">// return the standard time + the number of minutes divided</span>
                 <span class="comment">// the number of minutes in a day</span>
                 <span class="ident">t</span> <span class="op">-</span> <span class="ident">delta_minutes</span> <span class="op">/</span> <span class="number">24.</span> <span class="op">/</span> <span class="number">60.</span>
             }
-            <span class="ident">Time::Standard</span>(<span class="ident">t</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">t</span>,
+            <span class="ident">Time::Standard</span>(<span class="ident">t</span>) =&gt; <span class="ident">t</span>,
         }
     }
 
@@ -777,7 +777,7 @@ SOFTWARE.
     <span class="doccomment">///</span>
     <span class="doccomment">/// n should be in solar time, but this variable does not change daily so</span>
     <span class="doccomment">/// it probably does not matter... let&#39;s just treat it as Float</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">equation_of_time</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">n</span>: <span class="ident">Float</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Float</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">equation_of_time</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">n</span>: <span class="ident">Float</span>) -&gt; <span class="ident">Float</span> {
         <span class="kw">let</span> <span class="ident">b</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">b</span>(<span class="ident">n</span>);
         <span class="number">229.2</span>
             <span class="op">*</span> (<span class="number">0.000075</span> <span class="op">+</span> <span class="number">0.001868</span> <span class="op">*</span> <span class="ident">b</span>.<span class="ident">cos</span>()
@@ -790,7 +790,7 @@ SOFTWARE.
     <span class="doccomment">///</span>
     <span class="doccomment">/// n should be in solar time, but this variable does not change daily so</span>
     <span class="doccomment">/// it probably does not matter... let&#39;s just treat it as Float</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">declination</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">n</span>: <span class="ident">Float</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Float</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">declination</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">n</span>: <span class="ident">Float</span>) -&gt; <span class="ident">Float</span> {
         <span class="kw">let</span> <span class="ident">b</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">b</span>(<span class="ident">n</span>);
 
         <span class="comment">// Return in Radians</span>
@@ -805,7 +805,7 @@ SOFTWARE.
     <span class="doccomment">/// n should be in solar time, but this variable does not change daily so</span>
     <span class="doccomment">/// it probably does not matter... let&#39;s just treat it as Float</span>
     <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">b</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">n</span>: <span class="ident">Float</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Float</span> {
+    <span class="kw">fn</span> <span class="ident">b</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">n</span>: <span class="ident">Float</span>) -&gt; <span class="ident">Float</span> {
         (<span class="ident">n</span> <span class="op">-</span> <span class="number">1.0</span>) <span class="op">*</span> <span class="number">2.0</span> <span class="op">*</span> <span class="ident">PI</span> <span class="op">/</span> <span class="number">365.0</span>
     }
 
@@ -814,7 +814,7 @@ SOFTWARE.
     <span class="doccomment">///</span>
     <span class="doccomment">/// n should be in solar time, but this variable does not change daily so</span>
     <span class="doccomment">/// it probably does not matter... let&#39;s just treat it as Float</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">normal_extraterrestrial_radiation</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">n</span>: <span class="ident">Float</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Float</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">normal_extraterrestrial_radiation</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">n</span>: <span class="ident">Float</span>) -&gt; <span class="ident">Float</span> {
         <span class="kw">let</span> <span class="ident">b</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">b</span>(<span class="ident">n</span>);
         <span class="kw">let</span> <span class="ident">aux</span> <span class="op">=</span> <span class="number">1.000110</span>
             <span class="op">+</span> <span class="number">0.034221</span> <span class="op">*</span> <span class="ident">b</span>.<span class="ident">cos</span>()
@@ -825,7 +825,7 @@ SOFTWARE.
     }
 
     <span class="doccomment">/// Returns the hour angle in degrees    </span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">hour_angle</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">n</span>: <span class="ident">Time</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Float</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">hour_angle</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">n</span>: <span class="ident">Time</span>) -&gt; <span class="ident">Float</span> {
         <span class="kw">let</span> <span class="ident">n</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">unwrap_solar_time</span>(<span class="ident">n</span>);
 
         <span class="comment">// Remove the day (keep the hour). Multiply by 24 hours</span>
@@ -838,7 +838,7 @@ SOFTWARE.
     <span class="doccomment">/// Gets the sunset time (equation 1.6.10)</span>
     <span class="doccomment">/// n should be in solar time, but since it does not change</span>
     <span class="doccomment">/// much on a daily basis, we treat it as an Float</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">sunrise_sunset</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">n</span>: <span class="ident">Float</span>) <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">Time</span>, <span class="ident">Time</span>) {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">sunrise_sunset</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">n</span>: <span class="ident">Float</span>) -&gt; (<span class="ident">Time</span>, <span class="ident">Time</span>) {
         <span class="kw">let</span> <span class="ident">delta</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">declination</span>(<span class="ident">n</span>);
         <span class="kw">let</span> <span class="ident">cos_w</span> <span class="op">=</span> <span class="op">-</span><span class="self">self</span>.<span class="ident">latitude</span>.<span class="ident">tan</span>() <span class="op">*</span> <span class="ident">delta</span>.<span class="ident">tan</span>();
         <span class="kw">let</span> <span class="ident">w</span> <span class="op">=</span> <span class="ident">in_degrees</span>(<span class="ident">cos_w</span>.<span class="ident">acos</span>());
@@ -855,7 +855,7 @@ SOFTWARE.
     <span class="doccomment">/// Builds a vector that points towards the sun.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// Z is up, Y is North and X is East</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">sun_position</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">n</span>: <span class="ident">Time</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vector3D</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">sun_position</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">n</span>: <span class="ident">Time</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vector3D</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">n</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">unwrap_solar_time</span>(<span class="ident">n</span>);
 
         <span class="comment">// if it is night-time, return None</span>
@@ -929,7 +929,7 @@ SOFTWARE.
     <span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
     <span class="kw">use</span> <span class="ident">calendar::Date</span>;
 
-    <span class="kw">fn</span> <span class="ident">are_close</span>(<span class="ident">x</span>: <span class="ident">Float</span>, <span class="ident">y</span>: <span class="ident">Float</span>, <span class="ident">precision</span>: <span class="ident">Float</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    <span class="kw">fn</span> <span class="ident">are_close</span>(<span class="ident">x</span>: <span class="ident">Float</span>, <span class="ident">y</span>: <span class="ident">Float</span>, <span class="ident">precision</span>: <span class="ident">Float</span>) -&gt; <span class="ident">bool</span> {
         <span class="kw">if</span> (<span class="ident">x</span> <span class="op">-</span> <span class="ident">y</span>).<span class="ident">abs</span>() <span class="op">&lt;</span> <span class="ident">precision</span> {
             <span class="kw">return</span> <span class="bool-val">true</span>;
         }

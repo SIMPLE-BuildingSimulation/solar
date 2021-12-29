@@ -4069,11 +4069,11 @@ SOFTWARE.
 <span class="kw">const</span> <span class="ident">TNAZ</span>: [<span class="ident">usize</span>; <span class="number">7</span>] <span class="op">=</span> [<span class="number">30</span>, <span class="number">30</span>, <span class="number">24</span>, <span class="number">24</span>, <span class="number">18</span>, <span class="number">12</span>, <span class="number">6</span>];
 
 <span class="doccomment">/// Calculates the solid angle of a Cone.</span>
-<span class="kw">fn</span> <span class="ident">cone_solid_angle</span>(<span class="ident">angle</span>: <span class="ident">Float</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Float</span> {
+<span class="kw">fn</span> <span class="ident">cone_solid_angle</span>(<span class="ident">angle</span>: <span class="ident">Float</span>) -&gt; <span class="ident">Float</span> {
     <span class="number">2.0</span> <span class="op">*</span> <span class="ident">PI</span> <span class="op">*</span> (<span class="number">1.</span> <span class="op">-</span> <span class="ident">angle</span>.<span class="ident">cos</span>())
 }
 
-<span class="kw">fn</span> <span class="ident">patch_solid_angle</span>(<span class="ident">top_angle</span>: <span class="ident">Float</span>, <span class="ident">low_angle</span>: <span class="ident">Float</span>, <span class="ident">bins_in_row</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Float</span> {
+<span class="kw">fn</span> <span class="ident">patch_solid_angle</span>(<span class="ident">top_angle</span>: <span class="ident">Float</span>, <span class="ident">low_angle</span>: <span class="ident">Float</span>, <span class="ident">bins_in_row</span>: <span class="ident">usize</span>) -&gt; <span class="ident">Float</span> {
     <span class="comment">// This comes from genskymtx&#39;s code</span>
     <span class="number">2.</span> <span class="op">*</span> <span class="ident">PI</span> <span class="op">*</span> (<span class="ident">top_angle</span>.<span class="ident">sin</span>() <span class="op">-</span> <span class="ident">low_angle</span>.<span class="ident">sin</span>()) <span class="op">/</span> <span class="ident">bins_in_row</span> <span class="kw">as</span> <span class="ident">Float</span>
     <span class="comment">/*
@@ -4086,10 +4086,10 @@ SOFTWARE.
 
 <span class="doccomment">/// Returns the number of elements in row `row`, starting from</span>
 <span class="doccomment">/// 0.</span>
-<span class="kw">fn</span> <span class="ident">bins_in_row</span>(<span class="ident">mf</span>: <span class="ident">usize</span>, <span class="ident">row</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+<span class="kw">fn</span> <span class="ident">bins_in_row</span>(<span class="ident">mf</span>: <span class="ident">usize</span>, <span class="ident">row</span>: <span class="ident">usize</span>) -&gt; <span class="ident">usize</span> {
     <span class="comment">// This is missing the cap, which has only one element</span>
     <span class="kw">let</span> <span class="ident">nrows</span> <span class="op">=</span> <span class="number">7</span> <span class="op">*</span> <span class="ident">mf</span>;
-    <span class="kw">if</span> <span class="ident">row</span> <span class="op">=</span><span class="op">=</span> <span class="ident">nrows</span> {
+    <span class="kw">if</span> <span class="ident">row</span> <span class="op">==</span> <span class="ident">nrows</span> {
         <span class="number">1</span>
     } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">row</span> <span class="op">&gt;</span> <span class="ident">nrows</span> {
         <span class="macro">panic!</span>(
@@ -4105,7 +4105,7 @@ SOFTWARE.
 
 <span class="doccomment">/// Returns the height of a full row (the cap is only half</span>
 <span class="doccomment">/// this height)</span>
-<span class="kw">fn</span> <span class="ident">row_height</span>(<span class="ident">mf</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Float</span> {
+<span class="kw">fn</span> <span class="ident">row_height</span>(<span class="ident">mf</span>: <span class="ident">usize</span>) -&gt; <span class="ident">Float</span> {
     <span class="ident">PI</span> <span class="op">/</span> <span class="number">2.</span> <span class="op">/</span> ((<span class="ident">TNAZ</span>.<span class="ident">len</span>() <span class="op">*</span> <span class="ident">mf</span>) <span class="kw">as</span> <span class="ident">Float</span> <span class="op">+</span> <span class="number">0.5</span>)
 }
 
@@ -4132,9 +4132,9 @@ SOFTWARE.
 <span class="kw">impl</span> <span class="ident">ReinhartSky</span> {
     <span class="doccomment">/// Calculates the number of total bins in a Reinhart&#39;s discretization</span>
     <span class="doccomment">/// including the ground</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">n_bins</span>(<span class="ident">mf</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
-        <span class="kw">fn</span> <span class="ident">raccum</span>(<span class="ident">mf</span>: <span class="ident">usize</span>, <span class="ident">row</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
-            <span class="kw">if</span> <span class="ident">row</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">n_bins</span>(<span class="ident">mf</span>: <span class="ident">usize</span>) -&gt; <span class="ident">usize</span> {
+        <span class="kw">fn</span> <span class="ident">raccum</span>(<span class="ident">mf</span>: <span class="ident">usize</span>, <span class="ident">row</span>: <span class="ident">usize</span>) -&gt; <span class="ident">usize</span> {
+            <span class="kw">if</span> <span class="ident">row</span> <span class="op">==</span> <span class="number">0</span> {
                 <span class="number">0</span>
             } <span class="kw">else</span> {
                 <span class="ident">bins_in_row</span>(<span class="ident">mf</span>, <span class="ident">row</span> <span class="op">-</span> <span class="number">1</span>) <span class="op">+</span> <span class="ident">raccum</span>(<span class="ident">mf</span>, <span class="ident">row</span> <span class="op">-</span> <span class="number">1</span>)
@@ -4145,7 +4145,7 @@ SOFTWARE.
     }
 
     <span class="doccomment">/// Calculates the row in which a certain bin is located</span>
-    <span class="kw">fn</span> <span class="ident">bins_row</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">nbin</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+    <span class="kw">fn</span> <span class="ident">bins_row</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">nbin</span>: <span class="ident">usize</span>) -&gt; <span class="ident">usize</span> {
         <span class="kw">if</span> <span class="ident">nbin</span> <span class="op">&gt;</span> <span class="self">self</span>.<span class="ident">n_bins</span> {
             <span class="macro">panic!</span>(<span class="string">&quot;Trying to get the row of a bin out of bounds... found {} but only {} are available&quot;</span>, <span class="ident">nbin</span>, <span class="self">self</span>.<span class="ident">n_bins</span>);
         }
@@ -4161,12 +4161,12 @@ SOFTWARE.
     }
 
     <span class="doccomment">/// Calculates te solid angle of a certain bin</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">bin_solid_angle</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">nbin</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Float</span> {
-        <span class="kw">if</span> <span class="ident">nbin</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">bin_solid_angle</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">nbin</span>: <span class="ident">usize</span>) -&gt; <span class="ident">Float</span> {
+        <span class="kw">if</span> <span class="ident">nbin</span> <span class="op">==</span> <span class="number">0</span> {
             <span class="comment">// Ground... it is half a sphere</span>
             <span class="kw">return</span> <span class="number">2.</span> <span class="op">*</span> <span class="ident">PI</span>;
         }
-        <span class="kw">if</span> <span class="ident">nbin</span> <span class="op">=</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">n_bins</span> <span class="op">-</span> <span class="number">1</span> {
+        <span class="kw">if</span> <span class="ident">nbin</span> <span class="op">==</span> <span class="self">self</span>.<span class="ident">n_bins</span> <span class="op">-</span> <span class="number">1</span> {
             <span class="comment">// Cap... a small cone</span>
             <span class="kw">let</span> <span class="ident">height</span> <span class="op">=</span> <span class="ident">row_height</span>(<span class="self">self</span>.<span class="ident">mf</span>);
             <span class="kw">return</span> <span class="ident">cone_solid_angle</span>(<span class="ident">height</span> <span class="op">/</span> <span class="number">2.</span>);
@@ -4185,8 +4185,8 @@ SOFTWARE.
 
     <span class="doccomment">/// The number of sky elements accumulated up to row `row` (inclusive).</span>
     <span class="doccomment">/// Rows are Zero-indexed (i.e., the first one is 0)</span>
-    <span class="kw">fn</span> <span class="ident">raccum</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">row</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
-        <span class="kw">if</span> <span class="ident">row</span> <span class="op">=</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">n_bins</span> {
+    <span class="kw">fn</span> <span class="ident">raccum</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">row</span>: <span class="ident">usize</span>) -&gt; <span class="ident">usize</span> {
+        <span class="kw">if</span> <span class="ident">row</span> <span class="op">==</span> <span class="self">self</span>.<span class="ident">n_bins</span> {
             <span class="kw">return</span> <span class="self">self</span>.<span class="ident">n_bins</span>;
         } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">row</span> <span class="op">&gt;</span> <span class="self">self</span>.<span class="ident">n_bins</span> {
             <span class="macro">panic!</span>(
@@ -4199,9 +4199,9 @@ SOFTWARE.
     }
 
     <span class="doccomment">/// Returns the minimum and maximum altitude of a row, in Radians</span>
-    <span class="kw">fn</span> <span class="ident">row_altitude</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">row</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">Float</span>, <span class="ident">Float</span>) {
+    <span class="kw">fn</span> <span class="ident">row_altitude</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">row</span>: <span class="ident">usize</span>) -&gt; (<span class="ident">Float</span>, <span class="ident">Float</span>) {
         <span class="kw">let</span> <span class="ident">row_height</span> <span class="op">=</span> <span class="ident">row_height</span>(<span class="self">self</span>.<span class="ident">mf</span>);
-        <span class="kw">if</span> <span class="ident">row</span> <span class="op">=</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">n_rows</span> <span class="op">-</span> <span class="number">1</span> {
+        <span class="kw">if</span> <span class="ident">row</span> <span class="op">==</span> <span class="self">self</span>.<span class="ident">n_rows</span> <span class="op">-</span> <span class="number">1</span> {
             <span class="comment">// Cap</span>
             (<span class="ident">PI</span> <span class="op">/</span> <span class="number">2.</span> <span class="op">-</span> <span class="ident">row_height</span> <span class="op">/</span> <span class="number">2.</span>, <span class="ident">PI</span> <span class="op">/</span> <span class="number">2.</span>)
         } <span class="kw">else</span> {
@@ -4216,7 +4216,7 @@ SOFTWARE.
     <span class="doccomment">/// E.g., Receives the `z` component of a direction</span>
     <span class="doccomment">/// (if the vector is normalized) and returns the row towards which that</span>
     <span class="doccomment">/// vector is pointing.</span>
-    <span class="kw">fn</span> <span class="ident">sin_altitude_to_row</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">sin_altitude</span>: <span class="ident">Float</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+    <span class="kw">fn</span> <span class="ident">sin_altitude_to_row</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">sin_altitude</span>: <span class="ident">Float</span>) -&gt; <span class="ident">usize</span> {
         <span class="kw">if</span> <span class="ident">sin_altitude</span> <span class="op">&lt;</span> <span class="number">0.</span> {
             <span class="comment">// Points ot the ground... This should be handled in the caller function.</span>
             <span class="macro">panic!</span>(<span class="string">&quot;Trying to call sin_altitude_to_row() by using a negative sin_altitude (e.g., does not point to the sky&quot;</span>)
@@ -4234,9 +4234,9 @@ SOFTWARE.
     <span class="doccomment">///</span>
     <span class="doccomment">/// E.g., gets the `x` and `y` components of a vector pointing</span>
     <span class="doccomment">/// to the Sky and returns the bin pointed within that row</span>
-    <span class="kw">fn</span> <span class="ident">xy_to_bin</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">row</span>: <span class="ident">usize</span>, <span class="ident">x</span>: <span class="ident">Float</span>, <span class="ident">y</span>: <span class="ident">Float</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+    <span class="kw">fn</span> <span class="ident">xy_to_bin</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">row</span>: <span class="ident">usize</span>, <span class="ident">x</span>: <span class="ident">Float</span>, <span class="ident">y</span>: <span class="ident">Float</span>) -&gt; <span class="ident">usize</span> {
         <span class="comment">// If it is the cap, don&#39;t think about it and return 1</span>
-        <span class="kw">if</span> <span class="ident">row</span> <span class="op">=</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">n_rows</span> {
+        <span class="kw">if</span> <span class="ident">row</span> <span class="op">==</span> <span class="self">self</span>.<span class="ident">n_rows</span> {
             <span class="kw">return</span> <span class="number">1</span>;
         }
         <span class="comment">// Get the angle in Radians</span>
@@ -4257,7 +4257,7 @@ SOFTWARE.
     }
 
     <span class="doccomment">/// Returns the bin number pointed by direction `dir`</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">dir_to_bin</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">dir</span>: <span class="ident">Vector3D</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">dir_to_bin</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">dir</span>: <span class="ident">Vector3D</span>) -&gt; <span class="ident">usize</span> {
         <span class="comment">// Check that this is normalized in debug mode</span>
         <span class="macro">debug_assert!</span>((<span class="number">1.</span> <span class="op">-</span> <span class="ident">dir</span>.<span class="ident">length</span>()).<span class="ident">abs</span>() <span class="op">&lt;</span> <span class="number">1e-5</span>);
 
@@ -4269,7 +4269,7 @@ SOFTWARE.
     
         <span class="comment">// Get row</span>
         <span class="kw">let</span> <span class="ident">row</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">sin_altitude_to_row</span>(<span class="ident">dir</span>.<span class="ident">z</span>);        
-        <span class="kw">if</span> <span class="ident">row</span> <span class="op">=</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">n_rows</span> <span class="op">-</span> <span class="number">1</span> {
+        <span class="kw">if</span> <span class="ident">row</span> <span class="op">==</span> <span class="self">self</span>.<span class="ident">n_rows</span> <span class="op">-</span> <span class="number">1</span> {
             <span class="kw">return</span> <span class="self">self</span>.<span class="ident">n_bins</span> <span class="op">-</span> <span class="number">1</span>;
         }
 
@@ -4282,12 +4282,12 @@ SOFTWARE.
     }
 
     <span class="doccomment">/// Gets a `Vector3D` pointing to the centre the bin.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">bin_dir</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">nbin</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vector3D</span> {
-        <span class="kw">if</span> <span class="ident">nbin</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">bin_dir</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">nbin</span>: <span class="ident">usize</span>) -&gt; <span class="ident">Vector3D</span> {
+        <span class="kw">if</span> <span class="ident">nbin</span> <span class="op">==</span> <span class="number">0</span> {
             <span class="comment">// Ground</span>
             <span class="kw">return</span> <span class="ident">Vector3D::new</span>(<span class="number">0.</span>, <span class="number">0.</span>, <span class="op">-</span><span class="number">1.</span>);
         }
-        <span class="kw">if</span> <span class="ident">nbin</span> <span class="op">=</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">n_bins</span> <span class="op">-</span> <span class="number">1</span> {
+        <span class="kw">if</span> <span class="ident">nbin</span> <span class="op">==</span> <span class="self">self</span>.<span class="ident">n_bins</span> <span class="op">-</span> <span class="number">1</span> {
             <span class="comment">// Cap</span>
             <span class="kw">return</span> <span class="ident">Vector3D::new</span>(<span class="number">0.</span>, <span class="number">0.</span>, <span class="number">1.</span>);
         }
@@ -4334,8 +4334,8 @@ SOFTWARE.
     }
 
     <span class="doccomment">/// Creates  a new Reinhart sky discretization</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">mf</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="kw">if</span> <span class="ident">mf</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">mf</span>: <span class="ident">usize</span>) -&gt; <span class="self">Self</span> {
+        <span class="kw">if</span> <span class="ident">mf</span> <span class="op">==</span> <span class="number">0</span> {
             <span class="macro">panic!</span>(<span class="string">&quot;When creating ReinhartSky: mf must be 1 or greater&quot;</span>)
         }
 
@@ -4351,7 +4351,7 @@ SOFTWARE.
             <span class="ident">row_max_sin</span>.<span class="ident">push</span>(<span class="ident">acc</span>.<span class="ident">sin</span>());
 
             <span class="comment">// Fill the accumulated number of bins after each line.</span>
-            <span class="kw">if</span> <span class="ident">row</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+            <span class="kw">if</span> <span class="ident">row</span> <span class="op">==</span> <span class="number">0</span> {
                 <span class="ident">acc_bins</span>.<span class="ident">push</span>(<span class="number">0</span>)
             } <span class="kw">else</span> {
                 <span class="ident">acc_bins</span>.<span class="ident">push</span>(<span class="ident">acc_bins</span>[<span class="ident">row</span> <span class="op">-</span> <span class="number">1</span>] <span class="op">+</span> <span class="ident">bins_in_row</span>(<span class="ident">mf</span>, <span class="ident">row</span> <span class="op">-</span> <span class="number">1</span>))
@@ -4432,12 +4432,12 @@ SOFTWARE.
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_row_altitude</span>() {
-        <span class="kw">fn</span> <span class="ident">check</span>(<span class="ident">mf</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">String</span><span class="op">&gt;</span> {
+        <span class="kw">fn</span> <span class="ident">check</span>(<span class="ident">mf</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">String</span><span class="op">&gt;</span> {
             <span class="kw">let</span> <span class="ident">r</span> <span class="op">=</span> <span class="ident">ReinhartSky::new</span>(<span class="ident">mf</span>);
             <span class="kw">let</span> <span class="ident">height</span> <span class="op">=</span> <span class="ident">PI</span> <span class="op">/</span> <span class="number">2.</span> <span class="op">/</span> ((<span class="number">7</span> <span class="op">*</span> <span class="ident">mf</span>) <span class="kw">as</span> <span class="ident">Float</span> <span class="op">+</span> <span class="number">0.5</span>);
             <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">acc_alt</span> <span class="op">=</span> <span class="number">0.</span>;
             <span class="kw">for</span> <span class="ident">row</span> <span class="kw">in</span> <span class="number">0</span>..<span class="ident">r</span>.<span class="ident">n_rows</span> {
-                <span class="kw">let</span> (<span class="ident">exp_min</span>, <span class="ident">exp_max</span>) <span class="op">=</span> <span class="kw">if</span> <span class="ident">row</span> <span class="op">=</span><span class="op">=</span> <span class="ident">r</span>.<span class="ident">n_rows</span> <span class="op">-</span> <span class="number">1</span> {
+                <span class="kw">let</span> (<span class="ident">exp_min</span>, <span class="ident">exp_max</span>) <span class="op">=</span> <span class="kw">if</span> <span class="ident">row</span> <span class="op">==</span> <span class="ident">r</span>.<span class="ident">n_rows</span> <span class="op">-</span> <span class="number">1</span> {
                     (<span class="ident">acc_alt</span>, <span class="ident">PI</span> <span class="op">/</span> <span class="number">2.</span>)
                 } <span class="kw">else</span> {
                     (<span class="ident">acc_alt</span>, <span class="ident">acc_alt</span> <span class="op">+</span> <span class="ident">height</span>)
@@ -4499,7 +4499,7 @@ SOFTWARE.
             <span class="kw">for</span> <span class="ident">main_row</span> <span class="kw">in</span> <span class="number">0</span>..<span class="op">=</span><span class="number">7</span> {
                 <span class="kw">for</span> <span class="ident">i</span> <span class="kw">in</span> <span class="number">0</span>..<span class="ident">mf</span> {
                     <span class="kw">let</span> <span class="ident">row</span> <span class="op">=</span> <span class="ident">mf</span> <span class="op">*</span> <span class="ident">main_row</span> <span class="op">+</span> <span class="ident">i</span>;
-                    <span class="kw">if</span> <span class="ident">main_row</span> <span class="op">=</span><span class="op">=</span> <span class="number">7</span> {
+                    <span class="kw">if</span> <span class="ident">main_row</span> <span class="op">==</span> <span class="number">7</span> {
                         <span class="macro">assert_eq!</span>(<span class="ident">bins_in_row</span>(<span class="ident">mf</span>, <span class="ident">row</span>), <span class="number">1</span>);
                         <span class="kw">return</span>; <span class="comment">// stop test here</span>
                     } <span class="kw">else</span> {
