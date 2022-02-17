@@ -46,7 +46,7 @@ const PI: Float = std::f64::consts::PI;
 /// we are using the approach utilized by Radiance's source code. The two equations
 /// differ only in large zolar zeniths angles (e.g., close to 90 degrees)
 pub fn air_mass(solar_zenith: Float) -> Float {
-    1. / (solar_zenith.cos() + 0.15 * (93.885 - in_degrees(solar_zenith)).powf(-1.253))
+    1. / (solar_zenith.cos() + 0.15 * (93.885 - solar_zenith.to_degrees()).powf(-1.253))
 }
 
 /// Solar calculations library. Based on Duffie and Beckman's excellent book.
@@ -81,17 +81,6 @@ pub struct Solar {
 /// W/m2
 const SOLAR_CONSTANT: Float = 1367.0;
 
-/// Converts Radians into Degrees
-#[inline(always)]
-pub fn in_degrees(rad: Float) -> Float {
-    rad * 180.0 / PI
-}
-
-/// Converts degrees into Radians
-#[inline(always)]
-pub fn in_radians(degrees: Float) -> Float {
-    degrees * PI / 180.0
-}
 
 /// Solar or Standard time, containing the day of the year 'n'
 #[derive(Clone, Copy)]
@@ -116,7 +105,7 @@ impl Solar {
 
     /// Returns the difference between the solar and the standard time in minutes
     pub fn solar_standard_time_difference(&self, n: Float) -> Float {
-        4.0 * in_degrees(self.standard_meridian - self.longitude) + self.equation_of_time(n)
+        4.0 * (self.standard_meridian - self.longitude).to_degrees() + self.equation_of_time(n)
     }
 
     /// Returns the content of a Time enum. Transforms to Solar
@@ -206,7 +195,7 @@ impl Solar {
         let solar_hour = 24. * (n % 1.);
 
         // Multiply for 24 hours, and by 15degrees/hour
-        in_radians((solar_hour - 12.) * 15.)
+        ((solar_hour - 12.) * 15.).to_radians()
     }
 
     /// Gets the sunset time (equation 1.6.10)
@@ -215,7 +204,7 @@ impl Solar {
     pub fn sunrise_sunset(&self, n: Float) -> (Time, Time) {
         let delta = self.declination(n);
         let cos_w = -self.latitude.tan() * delta.tan();
-        let w = in_degrees(cos_w.acos());
+        let w = (cos_w.acos()).to_degrees();
         let half_n = w / 15.;
 
         // return
@@ -311,24 +300,7 @@ mod tests {
         false
     }
 
-    #[test]
-    fn test_in_degrees() {
-        // They are inverse functions of each other
-        // Thus, x = g(f(x)), for any x
-        assert!(are_close(1.0, in_radians(in_degrees(1.0)), 0.00001));
-        assert!(are_close(0.3, in_radians(in_degrees(0.3)), 0.00001));
-
-        // Conversions from rad to degree
-        const EPS: Float = 0.0001;
-        assert!(are_close(in_degrees(1.0), 57.29578, EPS));
-        assert!(are_close(in_degrees(1.45), 83.07888, EPS));
-        assert!(are_close(in_degrees(PI), 180.0, EPS));
-
-        // Conversions from degree to rad
-        assert!(are_close(in_radians(180.0), PI, EPS));
-        assert!(are_close(in_radians(230.0), 4.014257, EPS));
-        assert!(are_close(in_radians(130.0), 2.268928, EPS));
-    }
+    
 
     #[test]
     fn test_unwrap_time() {
@@ -338,9 +310,9 @@ mod tests {
 
         Answer: 10:19
         */
-        let longitude = in_radians(89.4);
-        let standard_meridian = in_radians(90.0);
-        let latitude = in_radians(-2.);
+        let longitude = (89.4 as Float).to_radians();
+        let standard_meridian = (90.0 as Float).to_radians();
+        let latitude = (-2. as Float).to_radians();
 
         let solar = Solar::new(latitude, longitude, standard_meridian);
 
@@ -378,11 +350,11 @@ mod tests {
 
             let d = solar.declination(n);
 
-            println!("exp: {}, found: {}", expected_d, in_degrees(d));
+            println!("exp: {}, found: {}", expected_d, d.to_degrees());
             // I suspect I need this margin of error (1.8 deg.)
             // because Duffie and Beckam do not specify the hour
             // of the day or the exact equation they use.
-            assert!(are_close(in_degrees(d), expected_d, 1.8))
+            assert!(are_close(d.to_degrees(), expected_d, 1.8))
         }
 
         // From table 1.6.1... declinations are in degrees
@@ -416,7 +388,7 @@ mod tests {
         }
         .day_of_year();
 
-        let w = in_degrees(solar.hour_angle(Time::Solar(n)));
+        let w = solar.hour_angle(Time::Solar(n)).to_degrees();
         assert!(are_close(w, -22.5, 0.1));
 
         /* OTHERS */
@@ -427,7 +399,7 @@ mod tests {
             hour: 12.0,
         }
         .day_of_year();
-        let w = in_degrees(solar.hour_angle(Time::Solar(n)));
+        let w = solar.hour_angle(Time::Solar(n)).to_degrees();
         assert!(are_close(w, 0., 0.1));
 
         // 13:00 == 15
@@ -437,7 +409,7 @@ mod tests {
             hour: 13.0,
         }
         .day_of_year();
-        let w = in_degrees(solar.hour_angle(Time::Solar(n)));
+        let w = solar.hour_angle(Time::Solar(n)).to_degrees();
         assert!(are_close(w, 15., 0.1));
     }
 
@@ -447,7 +419,7 @@ mod tests {
         Example 1.6.2
         Calculate the zenith and solar azimuth angles for φ = 43◦ at 9:30 AM on February 13 and 6:30 PM on July 1.
         */
-        let phi = in_radians(43.);
+        let phi = (43. as Float).to_radians();
 
         // FOR 9:30 AM on February 13
         // ==========================
@@ -462,21 +434,21 @@ mod tests {
         assert!(are_close(dir.length(), 1.0, 0.00001));
 
         // check declination
-        assert!(are_close(in_degrees(solar.declination(n)), -14., 0.5));
+        assert!(are_close(solar.declination(n).to_degrees(), -14., 0.5));
 
         // check hour angle
         assert!(are_close(
-            in_degrees(solar.hour_angle(Time::Solar(n))),
+            solar.hour_angle(Time::Solar(n)).to_degrees(),
             -37.5,
             0.5
         ));
 
         // zenith
-        let zenith = in_degrees(dir.z.acos());
+        let zenith = dir.z.acos().to_degrees();
         assert!(are_close(zenith, 66.5, 0.5));
 
         // Azimuth
-        let azimuth = in_degrees((dir.x / dir.y).atan());
+        let azimuth = (dir.x / dir.y).atan().to_degrees();
         assert!(are_close(azimuth, -40., 0.5));
 
         // 6:30 PM on July 1
@@ -491,22 +463,22 @@ mod tests {
         assert!(are_close(dir.length(), 1.0, 0.00001));
 
         // check declination
-        assert!(are_close(in_degrees(solar.declination(n)), 23.1, 0.5));
+        assert!(are_close(solar.declination(n).to_degrees(), 23.1, 0.5));
 
         // check hour angle
         assert!(are_close(
-            in_degrees(solar.hour_angle(Time::Solar(n))),
+            solar.hour_angle(Time::Solar(n)).to_degrees(),
             97.5,
             0.5
         ));
 
         // zenith
-        let zenith = in_degrees(dir.z.acos());
+        let zenith = dir.z.acos().to_degrees();
         assert!(are_close(zenith, 79.6, 0.5));
 
         // Azimuth
         println!("{}", dir);
-        let _azimuth = in_degrees((dir.x / dir.y).atan());
+        let _azimuth = (dir.x / dir.y).atan().to_degrees();
         //assert!(are_close(azimuth, 112., 0.5)); // This is working, but atan() returns -67 instead of 112
     }
 
@@ -520,7 +492,7 @@ mod tests {
         west of south.
         */
         // sun direction
-        let latitude = in_radians(43.);
+        let latitude = (43. as Float).to_radians();
         let solar = Solar::new(latitude, 0.0, 0.0);
         let n = Date {
             month: 2,
@@ -530,18 +502,18 @@ mod tests {
         .day_of_year();
         let solar_dir = solar.sun_position(Time::Solar(n)).unwrap();
         // check declination
-        assert!(are_close(in_degrees(solar.declination(n)), -14., 0.5));
+        assert!(are_close(solar.declination(n).to_degrees(), -14., 0.5));
 
         // check hour angle
         assert!(are_close(
-            in_degrees(solar.hour_angle(Time::Solar(n))),
+            solar.hour_angle(Time::Solar(n)).to_degrees(),
             -22.5,
             0.5
         ));
 
         // surface
-        let beta = in_radians(45.);
-        let gamma = in_radians(15.);
+        let beta = (45. as Float).to_radians();
+        let gamma = (15. as Float).to_radians();
 
         let x = -gamma.sin() * beta.sin();
         let y = -gamma.cos() * beta.sin();
@@ -551,7 +523,7 @@ mod tests {
 
         let angle = (solar_dir * surface_dir).acos();
 
-        assert!(are_close(in_degrees(angle), 35., 0.2));
+        assert!(are_close(angle.to_degrees(), 35., 0.2));
     }
 
     #[test]
@@ -568,7 +540,7 @@ mod tests {
         5.85 h (5 h and 51 min) from noon so sunrise is at 6:09 AM (and sunset
         is at 5:51 PM).
         */
-        let latitude = in_radians(43.);
+        let latitude = (43. as Float).to_radians();
         let solar = Solar::new(latitude, 0., 0.);
         let date = Date {
             month: 3,

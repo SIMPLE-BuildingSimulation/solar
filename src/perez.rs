@@ -443,7 +443,7 @@ mod tests {
     #[test]
     fn test_gen_sky_vec() {
         let mf = 1;
-        let lat = -41.3 * PI / 180.;
+        let lat = -41.3 * PI / 180.;        
         let lon = -174.78 * PI / 180.;
         let std_mer = -180. * PI / 180.;
         let month = 1;
