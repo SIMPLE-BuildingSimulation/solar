@@ -366,10 +366,11 @@ impl PerezSky {
         solar: &Solar,
         date: Date,
         weather_data: CurrentWeather,
+        units: SkyUnits,
     ) -> Result<Matrix, String> {
         let r = ReinhartSky::new(mf);
         let mut vec = Matrix::new(0.0, r.n_bins, 1);
-        Self::update_sky_vec(&mut vec, mf, solar, date, weather_data)?;
+        Self::update_sky_vec(&mut vec, mf, solar, date, weather_data, units)?;
         Ok(vec)
     }
 
@@ -379,9 +380,9 @@ impl PerezSky {
         solar: &Solar,
         date: Date,
         weather_data: CurrentWeather,
+        units: SkyUnits,
     ) -> Result<(), String> {
-        let add_sky = true;
-        let units = SkyUnits::Visible;
+        let add_sky = true;        
 
         let r = ReinhartSky::new(mf);
         let (rows, cols) = vec.size();
@@ -459,8 +460,9 @@ mod tests {
 
             ..CurrentWeather::default()
         };
+        let units = SkyUnits::Solar;
 
-        let vec = PerezSky::gen_sky_vec(mf, &solar, date, weather_data).unwrap();
+        let vec = PerezSky::gen_sky_vec(mf, &solar, date, weather_data, units).unwrap();
         println!("{}", vec);
     }
 
