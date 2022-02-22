@@ -102,30 +102,30 @@ impl PerezSky {
 
     // /// Calculates the direct illuminance/diffuse radiance ratio
     // /// according to Equation 8 and Table 4 of Perez et al. 1990
-    // fn direct_illuminance_ratio(p_water_content: Float, zenit: Float, sky_brightness: Float, index: usize)->Float{
-    //     if index > 7 {
-    //         panic!("Table 4 of Perez's paper has only 8 sky clearness categories (starting from 0)... received {}", index)
-    //     }
-    //     const TABLE : [(Float, Float, Float, Float); 8] =
-    //     [
-    //         (  57.20, -4.55, -2.98, 117.12 ),
-    //         (  98.99, -3.46, -1.21,  12.38 ),
-    //         ( 109.83, -4.90, -1.71,  -8.81 ),
-    //         ( 110.34, -5.84, -1.99,  -4.56 ),
-    //         ( 106.36, -3.97, -1.75,  -6.16 ),
-    //         ( 107.19, -1.25, -1.51, -26.73 ),
-    //         ( 105.75,  0.77, -1.26, -34.44 ),
-    //         ( 101.18,  1.58, -1.10,  -8.29 )
-    //     ];
+    fn direct_illuminance_ratio(p_water_content: Float, zenit: Float, sky_brightness: Float, index: usize)->Float{
+        if index > 7 {
+            panic!("Table 4 of Perez's paper has only 8 sky clearness categories (starting from 0)... received {}", index)
+        }
+        const TABLE : [(Float, Float, Float, Float); 8] =
+        [
+            (  57.20, -4.55, -2.98, 117.12 ),
+            (  98.99, -3.46, -1.21,  12.38 ),
+            ( 109.83, -4.90, -1.71,  -8.81 ),
+            ( 110.34, -5.84, -1.99,  -4.56 ),
+            ( 106.36, -3.97, -1.75,  -6.16 ),
+            ( 107.19, -1.25, -1.51, -26.73 ),
+            ( 105.75,  0.77, -1.26, -34.44 ),
+            ( 101.18,  1.58, -1.10,  -8.29 )
+        ];
 
-    //     let v = TABLE[index].0 +
-    //     TABLE[index].1*p_water_content +
-    //     TABLE[index].2*(5.73*zenit - 5.).exp() +
-    //     TABLE[index].3* sky_brightness;
+        let v = TABLE[index].0 +
+        TABLE[index].1*p_water_content +
+        TABLE[index].2*(5.73*zenit - 5.).exp() +
+        TABLE[index].3* sky_brightness;
 
-    //     // return
-    //     v.clamp(0., 9e9)
-    // }
+        // return
+        v.clamp(0., 9e9)
+    }
 
     /// Calculates the diffuse illuminance/diffuse radiance ratio
     /// according to Equation 7 and Table 4 of Perez et al. 1990
@@ -261,7 +261,9 @@ impl PerezSky {
         dew_point: Float,
         diffuse_horizontal_irrad: Float,
         direct_normal_irrad: Float,
-    ) -> Box<dyn Fn(Vector3D) -> Float> {
+        albedo: Float
+    ) -> Box<dyn Fn(Vector3D) -> Float> {        
+
         // Convert local into solar time
         let day = Time::Standard(date.day_of_year());
         let sun_position = solar.sun_position(day).unwrap();
@@ -307,29 +309,21 @@ impl PerezSky {
 
         let mut diff_illum = diffuse_horizontal_irrad
             * Self::diffuse_illuminance_ratio(apwc, cos_zenit, sky_brightness, index);
-        // let mut dir_illum = direct_normal_irrad * Self::direct_illuminance_ratio(apwc, zenith, sky_brightness, index);
+        let mut dir_illum = direct_normal_irrad * Self::direct_illuminance_ratio(apwc, zenith, sky_brightness, index);
 
         if let SkyUnits::Solar = units {
             diff_illum = diffuse_horizontal_irrad * WHTEFFICACY;
-            // dir_illum = direct_normal_irrad * WHTEFFICACY;
+            dir_illum = direct_normal_irrad * WHTEFFICACY;
         }
-        /*
-
-            ... for later
-                /* Compute ground radiance (include solar contribution if any) */
-                parr[0] = diff_illum;
-                if (altitude > 0)
-                    parr[0] += dir_illum * sin(altitude);
-                parr[2] = parr[1] = parr[0] *= (1./PI/WHTEFFICACY);
-                multcolor(parr, grefl);
-        */
+        
+        
 
         // Calculate Perez params
         let params = Self::calc_params(zenith, sky_clearness, sky_brightness);
 
         // Build closure
         let ret = move |dir: Vector3D| -> Float {
-            debug_assert!((1. - dir.length()) < 1e-5);
+            debug_assert!((1. - dir.length()) < 1e-5);            
 
             let cosgamma = sun_position * dir;
             let gamma = cosgamma.acos();
@@ -358,7 +352,19 @@ impl PerezSky {
         let norm_diff_illum = diff_illum / (norm_diff_illum * WHTEFFICACY);
 
         // Return
-        Box::new(move |dir: Vector3D| -> Float { ret(dir) * norm_diff_illum })
+        Box::new(move |dir: Vector3D| -> Float { 
+            // If ground
+            if dir.z <= 0.0 {
+                let mut global_horizontal = diff_illum;
+                if cos_zenit > 0. {                    
+                    global_horizontal += dir_illum * cos_zenit;
+                }
+                let ground = albedo * global_horizontal / PI/WHTEFFICACY;                
+                return ground;
+            }
+            // If sky
+            ret(dir) * norm_diff_illum 
+        })
     }
 
     pub fn gen_sky_vec(
@@ -367,10 +373,13 @@ impl PerezSky {
         date: Date,
         weather_data: CurrentWeather,
         units: SkyUnits,
+        albedo: Float,
+        add_sky: bool,
+        add_sun: bool,
     ) -> Result<Matrix, String> {
         let r = ReinhartSky::new(mf);
         let mut vec = Matrix::new(0.0, r.n_bins, 1);
-        Self::update_sky_vec(&mut vec, mf, solar, date, weather_data, units)?;
+        Self::update_sky_vec(&mut vec, mf, solar, date, weather_data, units, albedo, add_sky, add_sun)?;
         Ok(vec)
     }
 
@@ -381,8 +390,10 @@ impl PerezSky {
         date: Date,
         weather_data: CurrentWeather,
         units: SkyUnits,
-    ) -> Result<(), String> {
-        let add_sky = true;        
+        albedo: Float,
+        add_sky: bool,
+        add_sun: bool,
+    ) -> Result<(), String> {        
 
         let r = ReinhartSky::new(mf);
         let (rows, cols) = vec.size();
@@ -416,6 +427,14 @@ impl PerezSky {
             Some(v) => v,
         };
 
+        // If it is nighttime, just fill with zeroes
+        if direct_normal_irrad + diffuse_horizontal_irrad < 1e-4 {            
+            for bin in 0..r.n_bins {                                
+                vec.set(bin, 0, 0.0)?;
+            }
+            return Ok(())
+        }
+
         if add_sky {
             let sky_func = Self::get_sky_func_standard_time(
                 units,
@@ -424,10 +443,13 @@ impl PerezSky {
                 dew_point,
                 diffuse_horizontal_irrad,
                 direct_normal_irrad,
+                albedo,
             );
+
             for bin in 0..r.n_bins {
+                
                 let dir = r.bin_dir(bin);
-                let v = sky_func(dir);
+                let v = sky_func(dir);                
                 vec.set(bin, 0, v)?;
             }
         }
@@ -444,25 +466,28 @@ mod tests {
     #[test]
     fn test_gen_sky_vec() {
         let mf = 1;
-        let lat = -41.3 * PI / 180.;        
-        let lon = -174.78 * PI / 180.;
+        let lat = -41.41 * PI / 180.;        
+        let lon = -174.87 * PI / 180.;
         let std_mer = -180. * PI / 180.;
         let month = 1;
         let day = 1;
         let hour = 5.5;
         let date = Date { month, day, hour };
         let solar = Solar::new(lat, lon, std_mer);
+        let albedo = 0.2;
+        let add_sky = true;
+        let add_sun = false;
 
         let weather_data = CurrentWeather {
             dew_point_temperature: Some(11.),
-            direct_normal_radiation: Some(51.),
-            diffuse_horizontal_radiation: Some(36.),
+            direct_normal_radiation: Some(538.),
+            diffuse_horizontal_radiation: Some(25.),
 
             ..CurrentWeather::default()
         };
-        let units = SkyUnits::Solar;
+        let units = SkyUnits::Visible;
 
-        let vec = PerezSky::gen_sky_vec(mf, &solar, date, weather_data, units).unwrap();
+        let vec = PerezSky::gen_sky_vec(mf, &solar, date, weather_data, units, albedo, add_sky, add_sun).unwrap();
         println!("{}", vec);
     }
 
@@ -488,6 +513,7 @@ mod tests {
             dew_point,
             diffuse_horizontal_irrad,
             direct_normal_irrad,
+            0.2,
         );
         let found = fun(Vector3D::new(
             0.04327423224079154,
@@ -525,6 +551,7 @@ mod tests {
             dew_point,
             diffuse_horizontal_irrad,
             direct_normal_irrad,
+            0.2,
         );
         let found = fun(Vector3D::new(0.0, -0.9987523388778446, 0.04993761694389223));
         // Automatically generated using command: gendaylit 2 2 12.0 -W 500.0 200.0 -a 1 -o 1 -m 1 -O 0 | tail -n 1 | rcalc  -e 'A1=$2; A2=$3; A3=$4; A4=$5; A5=$6; A6=$7; A7=$8; A8=$9; A9=$10; A10=$11; Dx=0.0;  Dy=-0.9987523388778446; Dz=0.04993761694389223' -f ./perezlum.cal -o '${intersky}'
@@ -558,6 +585,7 @@ mod tests {
             dew_point,
             diffuse_horizontal_irrad,
             direct_normal_irrad,
+            0.2,
         );
         let found = fun(Vector3D::new(-0.9912279006826347, 0.0, 0.13216372009101796));
         // Automatically generated using command: gendaylit 2 2 12.0 -W 500.0 200.0 -a 1 -o 1 -m 1 -O 0 | tail -n 1 | rcalc  -e 'A1=$2; A2=$3; A3=$4; A4=$5; A5=$6; A6=$7; A7=$8; A8=$9; A9=$10; A10=$11; Dx=-0.9912279006826347;  Dy=0.0; Dz=0.13216372009101796' -f ./perezlum.cal -o '${intersky}'
@@ -591,6 +619,7 @@ mod tests {
             dew_point,
             diffuse_horizontal_irrad,
             direct_normal_irrad,
+            0.2,
         );
         let found = fun(Vector3D::new(
             0.04327423224079154,
@@ -628,6 +657,7 @@ mod tests {
             dew_point,
             diffuse_horizontal_irrad,
             direct_normal_irrad,
+            0.2,
         );
         let found = fun(Vector3D::new(0.0, -0.9987523388778446, 0.04993761694389223));
         // Automatically generated using command: gendaylit 4 5 10.0 -W 600.0 200.0 -a -33 -o -40 -m -40 -O 0 | tail -n 1 | rcalc  -e 'A1=$2; A2=$3; A3=$4; A4=$5; A5=$6; A6=$7; A7=$8; A8=$9; A9=$10; A10=$11; Dx=0.0;  Dy=-0.9987523388778446; Dz=0.04993761694389223' -f ./perezlum.cal -o '${intersky}'
@@ -661,6 +691,7 @@ mod tests {
             dew_point,
             diffuse_horizontal_irrad,
             direct_normal_irrad,
+            0.2,
         );
         let found = fun(Vector3D::new(-0.9912279006826347, 0.0, 0.13216372009101796));
         // Automatically generated using command: gendaylit 4 5 10.0 -W 600.0 200.0 -a -33 -o -40 -m -40 -O 0 | tail -n 1 | rcalc  -e 'A1=$2; A2=$3; A3=$4; A4=$5; A5=$6; A6=$7; A7=$8; A8=$9; A9=$10; A10=$11; Dx=-0.9912279006826347;  Dy=0.0; Dz=0.13216372009101796' -f ./perezlum.cal -o '${intersky}'
@@ -690,6 +721,7 @@ mod tests {
             dew_point,
             diffuse_horizontal_irrad,
             direct_normal_irrad,
+            0.2,
         );
         let found = fun(Vector3D::new(
             0.04327423224079154,
@@ -723,6 +755,7 @@ mod tests {
             dew_point,
             diffuse_horizontal_irrad,
             direct_normal_irrad,
+            0.2,
         );
         let found = fun(Vector3D::new(0.0, -0.9987523388778446, 0.04993761694389223));
         // Automatically generated using command: gendaylit 11 7 16.0 -W 900.0 100.0 -a -47 -o 47 -m 47 -O 0 | tail -n 1 | rcalc  -e 'A1=$2; A2=$3; A3=$4; A4=$5; A5=$6; A6=$7; A7=$8; A8=$9; A9=$10; A10=$11; Dx=0.0;  Dy=-0.9987523388778446; Dz=0.04993761694389223' -f ./perezlum.cal -o '${intersky}'
@@ -752,6 +785,7 @@ mod tests {
             dew_point,
             diffuse_horizontal_irrad,
             direct_normal_irrad,
+            0.2,
         );
         let found = fun(Vector3D::new(-0.9912279006826347, 0.0, 0.13216372009101796));
         // Automatically generated using command: gendaylit 11 7 16.0 -W 900.0 100.0 -a -47 -o 47 -m 47 -O 0 | tail -n 1 | rcalc  -e 'A1=$2; A2=$3; A3=$4; A4=$5; A5=$6; A6=$7; A7=$8; A8=$9; A9=$10; A10=$11; Dx=-0.9912279006826347;  Dy=0.0; Dz=0.13216372009101796' -f ./perezlum.cal -o '${intersky}'
@@ -781,6 +815,7 @@ mod tests {
             dew_point,
             diffuse_horizontal_irrad,
             direct_normal_irrad,
+            0.2,
         );
         let found = fun(Vector3D::new(
             0.04327423224079154,
@@ -814,6 +849,7 @@ mod tests {
             dew_point,
             diffuse_horizontal_irrad,
             direct_normal_irrad,
+            0.2,
         );
         let found = fun(Vector3D::new(0.0, -0.9987523388778446, 0.04993761694389223));
         // Automatically generated using command: gendaylit 1 1 13.0 -W 300.0 300.0 -a 47 -o 12 -m 12 -O 0 | tail -n 1 | rcalc  -e 'A1=$2; A2=$3; A3=$4; A4=$5; A5=$6; A6=$7; A7=$8; A8=$9; A9=$10; A10=$11; Dx=0.0;  Dy=-0.9987523388778446; Dz=0.04993761694389223' -f ./perezlum.cal -o '${intersky}'
@@ -843,6 +879,7 @@ mod tests {
             dew_point,
             diffuse_horizontal_irrad,
             direct_normal_irrad,
+            0.2,
         );
         let found = fun(Vector3D::new(-0.9912279006826347, 0.0, 0.13216372009101796));
         // Automatically generated using command: gendaylit 1 1 13.0 -W 300.0 300.0 -a 47 -o 12 -m 12 -O 0 | tail -n 1 | rcalc  -e 'A1=$2; A2=$3; A3=$4; A4=$5; A5=$6; A6=$7; A7=$8; A8=$9; A9=$10; A10=$11; Dx=-0.9912279006826347;  Dy=0.0; Dz=0.13216372009101796' -f ./perezlum.cal -o '${intersky}'
@@ -879,6 +916,7 @@ mod tests {
             dew_point,
             diffuse_horizontal_irrad,
             direct_normal_irrad,
+            0.2,
         );
         let found = fun(Vector3D::new(
             0.04327423224079154,
@@ -916,6 +954,7 @@ mod tests {
             dew_point,
             diffuse_horizontal_irrad,
             direct_normal_irrad,
+            0.2,
         );
         let found = fun(Vector3D::new(0.0, -0.9987523388778446, 0.04993761694389223));
         // Automatically generated using command: gendaylit 2 2 12.0 -W 500.0 200.0 -a 1 -o 1 -m 1 -O 1 | tail -n 1 | rcalc  -e 'A1=$2; A2=$3; A3=$4; A4=$5; A5=$6; A6=$7; A7=$8; A8=$9; A9=$10; A10=$11; Dx=0.0;  Dy=-0.9987523388778446; Dz=0.04993761694389223' -f ./perezlum.cal -o '${intersky}'
@@ -949,6 +988,7 @@ mod tests {
             dew_point,
             diffuse_horizontal_irrad,
             direct_normal_irrad,
+            0.2,
         );
         let found = fun(Vector3D::new(-0.9912279006826347, 0.0, 0.13216372009101796));
         // Automatically generated using command: gendaylit 2 2 12.0 -W 500.0 200.0 -a 1 -o 1 -m 1 -O 1 | tail -n 1 | rcalc  -e 'A1=$2; A2=$3; A3=$4; A4=$5; A5=$6; A6=$7; A7=$8; A8=$9; A9=$10; A10=$11; Dx=-0.9912279006826347;  Dy=0.0; Dz=0.13216372009101796' -f ./perezlum.cal -o '${intersky}'
@@ -982,6 +1022,7 @@ mod tests {
             dew_point,
             diffuse_horizontal_irrad,
             direct_normal_irrad,
+            0.2,
         );
         let found = fun(Vector3D::new(
             0.04327423224079154,
@@ -1019,6 +1060,7 @@ mod tests {
             dew_point,
             diffuse_horizontal_irrad,
             direct_normal_irrad,
+            0.2,
         );
         let found = fun(Vector3D::new(0.0, -0.9987523388778446, 0.04993761694389223));
         // Automatically generated using command: gendaylit 4 5 10.0 -W 600.0 200.0 -a -33 -o -40 -m -40 -O 1 | tail -n 1 | rcalc  -e 'A1=$2; A2=$3; A3=$4; A4=$5; A5=$6; A6=$7; A7=$8; A8=$9; A9=$10; A10=$11; Dx=0.0;  Dy=-0.9987523388778446; Dz=0.04993761694389223' -f ./perezlum.cal -o '${intersky}'
@@ -1052,6 +1094,7 @@ mod tests {
             dew_point,
             diffuse_horizontal_irrad,
             direct_normal_irrad,
+            0.2,
         );
         let found = fun(Vector3D::new(-0.9912279006826347, 0.0, 0.13216372009101796));
         // Automatically generated using command: gendaylit 4 5 10.0 -W 600.0 200.0 -a -33 -o -40 -m -40 -O 1 | tail -n 1 | rcalc  -e 'A1=$2; A2=$3; A3=$4; A4=$5; A5=$6; A6=$7; A7=$8; A8=$9; A9=$10; A10=$11; Dx=-0.9912279006826347;  Dy=0.0; Dz=0.13216372009101796' -f ./perezlum.cal -o '${intersky}'
@@ -1081,6 +1124,7 @@ mod tests {
             dew_point,
             diffuse_horizontal_irrad,
             direct_normal_irrad,
+            0.2,
         );
         let found = fun(Vector3D::new(
             0.04327423224079154,
@@ -1114,6 +1158,7 @@ mod tests {
             dew_point,
             diffuse_horizontal_irrad,
             direct_normal_irrad,
+            0.2,
         );
         let found = fun(Vector3D::new(0.0, -0.9987523388778446, 0.04993761694389223));
         // Automatically generated using command: gendaylit 11 7 16.0 -W 900.0 100.0 -a -47 -o 47 -m 47 -O 1 | tail -n 1 | rcalc  -e 'A1=$2; A2=$3; A3=$4; A4=$5; A5=$6; A6=$7; A7=$8; A8=$9; A9=$10; A10=$11; Dx=0.0;  Dy=-0.9987523388778446; Dz=0.04993761694389223' -f ./perezlum.cal -o '${intersky}'
@@ -1143,6 +1188,7 @@ mod tests {
             dew_point,
             diffuse_horizontal_irrad,
             direct_normal_irrad,
+            0.2,
         );
         let found = fun(Vector3D::new(-0.9912279006826347, 0.0, 0.13216372009101796));
         // Automatically generated using command: gendaylit 11 7 16.0 -W 900.0 100.0 -a -47 -o 47 -m 47 -O 1 | tail -n 1 | rcalc  -e 'A1=$2; A2=$3; A3=$4; A4=$5; A5=$6; A6=$7; A7=$8; A8=$9; A9=$10; A10=$11; Dx=-0.9912279006826347;  Dy=0.0; Dz=0.13216372009101796' -f ./perezlum.cal -o '${intersky}'
@@ -1172,6 +1218,7 @@ mod tests {
             dew_point,
             diffuse_horizontal_irrad,
             direct_normal_irrad,
+            0.2,
         );
         let found = fun(Vector3D::new(
             0.04327423224079154,
@@ -1205,6 +1252,7 @@ mod tests {
             dew_point,
             diffuse_horizontal_irrad,
             direct_normal_irrad,
+            0.2,
         );
         let found = fun(Vector3D::new(0.0, -0.9987523388778446, 0.04993761694389223));
         // Automatically generated using command: gendaylit 1 1 13.0 -W 300.0 300.0 -a 47 -o 12 -m 12 -O 1 | tail -n 1 | rcalc  -e 'A1=$2; A2=$3; A3=$4; A4=$5; A5=$6; A6=$7; A7=$8; A8=$9; A9=$10; A10=$11; Dx=0.0;  Dy=-0.9987523388778446; Dz=0.04993761694389223' -f ./perezlum.cal -o '${intersky}'
@@ -1234,6 +1282,7 @@ mod tests {
             dew_point,
             diffuse_horizontal_irrad,
             direct_normal_irrad,
+            0.2,
         );
         let found = fun(Vector3D::new(-0.9912279006826347, 0.0, 0.13216372009101796));
         // Automatically generated using command: gendaylit 1 1 13.0 -W 300.0 300.0 -a 47 -o 12 -m 12 -O 1 | tail -n 1 | rcalc  -e 'A1=$2; A2=$3; A3=$4; A4=$5; A5=$6; A6=$7; A7=$8; A8=$9; A9=$10; A10=$11; Dx=-0.9912279006826347;  Dy=0.0; Dz=0.13216372009101796' -f ./perezlum.cal -o '${intersky}'
