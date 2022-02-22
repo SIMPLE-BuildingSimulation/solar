@@ -1283,6 +1283,55 @@
 <span id="1248">1248</span>
 <span id="1249">1249</span>
 <span id="1250">1250</span>
+<span id="1251">1251</span>
+<span id="1252">1252</span>
+<span id="1253">1253</span>
+<span id="1254">1254</span>
+<span id="1255">1255</span>
+<span id="1256">1256</span>
+<span id="1257">1257</span>
+<span id="1258">1258</span>
+<span id="1259">1259</span>
+<span id="1260">1260</span>
+<span id="1261">1261</span>
+<span id="1262">1262</span>
+<span id="1263">1263</span>
+<span id="1264">1264</span>
+<span id="1265">1265</span>
+<span id="1266">1266</span>
+<span id="1267">1267</span>
+<span id="1268">1268</span>
+<span id="1269">1269</span>
+<span id="1270">1270</span>
+<span id="1271">1271</span>
+<span id="1272">1272</span>
+<span id="1273">1273</span>
+<span id="1274">1274</span>
+<span id="1275">1275</span>
+<span id="1276">1276</span>
+<span id="1277">1277</span>
+<span id="1278">1278</span>
+<span id="1279">1279</span>
+<span id="1280">1280</span>
+<span id="1281">1281</span>
+<span id="1282">1282</span>
+<span id="1283">1283</span>
+<span id="1284">1284</span>
+<span id="1285">1285</span>
+<span id="1286">1286</span>
+<span id="1287">1287</span>
+<span id="1288">1288</span>
+<span id="1289">1289</span>
+<span id="1290">1290</span>
+<span id="1291">1291</span>
+<span id="1292">1292</span>
+<span id="1293">1293</span>
+<span id="1294">1294</span>
+<span id="1295">1295</span>
+<span id="1296">1296</span>
+<span id="1297">1297</span>
+<span id="1298">1298</span>
+<span id="1299">1299</span>
 </pre><pre class="rust"><code><span class="comment">/*
 MIT License
 Copyright (c) 2021 Germán Molina
@@ -1387,30 +1436,30 @@ SOFTWARE.
 
     <span class="comment">// /// Calculates the direct illuminance/diffuse radiance ratio</span>
     <span class="comment">// /// according to Equation 8 and Table 4 of Perez et al. 1990</span>
-    <span class="comment">// fn direct_illuminance_ratio(p_water_content: Float, zenit: Float, sky_brightness: Float, index: usize)-&gt;Float{</span>
-    <span class="comment">//     if index &gt; 7 {</span>
-    <span class="comment">//         panic!(&quot;Table 4 of Perez&#39;s paper has only 8 sky clearness categories (starting from 0)... received {}&quot;, index)</span>
-    <span class="comment">//     }</span>
-    <span class="comment">//     const TABLE : [(Float, Float, Float, Float); 8] =</span>
-    <span class="comment">//     [</span>
-    <span class="comment">//         (  57.20, -4.55, -2.98, 117.12 ),</span>
-    <span class="comment">//         (  98.99, -3.46, -1.21,  12.38 ),</span>
-    <span class="comment">//         ( 109.83, -4.90, -1.71,  -8.81 ),</span>
-    <span class="comment">//         ( 110.34, -5.84, -1.99,  -4.56 ),</span>
-    <span class="comment">//         ( 106.36, -3.97, -1.75,  -6.16 ),</span>
-    <span class="comment">//         ( 107.19, -1.25, -1.51, -26.73 ),</span>
-    <span class="comment">//         ( 105.75,  0.77, -1.26, -34.44 ),</span>
-    <span class="comment">//         ( 101.18,  1.58, -1.10,  -8.29 )</span>
-    <span class="comment">//     ];</span>
+    <span class="kw">fn</span> <span class="ident">direct_illuminance_ratio</span>(<span class="ident">p_water_content</span>: <span class="ident">Float</span>, <span class="ident">zenit</span>: <span class="ident">Float</span>, <span class="ident">sky_brightness</span>: <span class="ident">Float</span>, <span class="ident">index</span>: <span class="ident">usize</span>)-&gt;<span class="ident">Float</span>{
+        <span class="kw">if</span> <span class="ident">index</span> <span class="op">&gt;</span> <span class="number">7</span> {
+            <span class="macro">panic!</span>(<span class="string">&quot;Table 4 of Perez&#39;s paper has only 8 sky clearness categories (starting from 0)... received {}&quot;</span>, <span class="ident">index</span>)
+        }
+        <span class="kw">const</span> <span class="ident">TABLE</span> : [(<span class="ident">Float</span>, <span class="ident">Float</span>, <span class="ident">Float</span>, <span class="ident">Float</span>); <span class="number">8</span>] <span class="op">=</span>
+        [
+            (  <span class="number">57.20</span>, <span class="op">-</span><span class="number">4.55</span>, <span class="op">-</span><span class="number">2.98</span>, <span class="number">117.12</span> ),
+            (  <span class="number">98.99</span>, <span class="op">-</span><span class="number">3.46</span>, <span class="op">-</span><span class="number">1.21</span>,  <span class="number">12.38</span> ),
+            ( <span class="number">109.83</span>, <span class="op">-</span><span class="number">4.90</span>, <span class="op">-</span><span class="number">1.71</span>,  <span class="op">-</span><span class="number">8.81</span> ),
+            ( <span class="number">110.34</span>, <span class="op">-</span><span class="number">5.84</span>, <span class="op">-</span><span class="number">1.99</span>,  <span class="op">-</span><span class="number">4.56</span> ),
+            ( <span class="number">106.36</span>, <span class="op">-</span><span class="number">3.97</span>, <span class="op">-</span><span class="number">1.75</span>,  <span class="op">-</span><span class="number">6.16</span> ),
+            ( <span class="number">107.19</span>, <span class="op">-</span><span class="number">1.25</span>, <span class="op">-</span><span class="number">1.51</span>, <span class="op">-</span><span class="number">26.73</span> ),
+            ( <span class="number">105.75</span>,  <span class="number">0.77</span>, <span class="op">-</span><span class="number">1.26</span>, <span class="op">-</span><span class="number">34.44</span> ),
+            ( <span class="number">101.18</span>,  <span class="number">1.58</span>, <span class="op">-</span><span class="number">1.10</span>,  <span class="op">-</span><span class="number">8.29</span> )
+        ];
 
-    <span class="comment">//     let v = TABLE[index].0 +</span>
-    <span class="comment">//     TABLE[index].1*p_water_content +</span>
-    <span class="comment">//     TABLE[index].2*(5.73*zenit - 5.).exp() +</span>
-    <span class="comment">//     TABLE[index].3* sky_brightness;</span>
+        <span class="kw">let</span> <span class="ident">v</span> <span class="op">=</span> <span class="ident">TABLE</span>[<span class="ident">index</span>].<span class="number">0</span> <span class="op">+</span>
+        <span class="ident">TABLE</span>[<span class="ident">index</span>].<span class="number">1</span><span class="kw-2">*</span><span class="ident">p_water_content</span> <span class="op">+</span>
+        <span class="ident">TABLE</span>[<span class="ident">index</span>].<span class="number">2</span><span class="kw-2">*</span>(<span class="number">5.73</span><span class="kw-2">*</span><span class="ident">zenit</span> <span class="op">-</span> <span class="number">5.</span>).<span class="ident">exp</span>() <span class="op">+</span>
+        <span class="ident">TABLE</span>[<span class="ident">index</span>].<span class="number">3</span><span class="op">*</span> <span class="ident">sky_brightness</span>;
 
-    <span class="comment">//     // return</span>
-    <span class="comment">//     v.clamp(0., 9e9)</span>
-    <span class="comment">// }</span>
+        <span class="comment">// return</span>
+        <span class="ident">v</span>.<span class="ident">clamp</span>(<span class="number">0.</span>, <span class="number">9e9</span>)
+    }
 
     <span class="doccomment">/// Calculates the diffuse illuminance/diffuse radiance ratio</span>
     <span class="doccomment">/// according to Equation 7 and Table 4 of Perez et al. 1990</span>
@@ -1546,7 +1595,9 @@ SOFTWARE.
         <span class="ident">dew_point</span>: <span class="ident">Float</span>,
         <span class="ident">diffuse_horizontal_irrad</span>: <span class="ident">Float</span>,
         <span class="ident">direct_normal_irrad</span>: <span class="ident">Float</span>,
-    ) -&gt; <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Fn</span>(<span class="ident">Vector3D</span>) -&gt; <span class="ident">Float</span><span class="op">&gt;</span> {
+        <span class="ident">albedo</span>: <span class="ident">Float</span>
+    ) -&gt; <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Fn</span>(<span class="ident">Vector3D</span>) -&gt; <span class="ident">Float</span><span class="op">&gt;</span> {        
+
         <span class="comment">// Convert local into solar time</span>
         <span class="kw">let</span> <span class="ident">day</span> <span class="op">=</span> <span class="ident">Time::Standard</span>(<span class="ident">date</span>.<span class="ident">day_of_year</span>());
         <span class="kw">let</span> <span class="ident">sun_position</span> <span class="op">=</span> <span class="ident">solar</span>.<span class="ident">sun_position</span>(<span class="ident">day</span>).<span class="ident">unwrap</span>();
@@ -1592,29 +1643,21 @@ SOFTWARE.
 
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">diff_illum</span> <span class="op">=</span> <span class="ident">diffuse_horizontal_irrad</span>
             <span class="op">*</span> <span class="ident"><span class="self">Self</span>::diffuse_illuminance_ratio</span>(<span class="ident">apwc</span>, <span class="ident">cos_zenit</span>, <span class="ident">sky_brightness</span>, <span class="ident">index</span>);
-        <span class="comment">// let mut dir_illum = direct_normal_irrad * Self::direct_illuminance_ratio(apwc, zenith, sky_brightness, index);</span>
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">dir_illum</span> <span class="op">=</span> <span class="ident">direct_normal_irrad</span> <span class="op">*</span> <span class="ident"><span class="self">Self</span>::direct_illuminance_ratio</span>(<span class="ident">apwc</span>, <span class="ident">zenith</span>, <span class="ident">sky_brightness</span>, <span class="ident">index</span>);
 
         <span class="kw">if</span> <span class="kw">let</span> <span class="ident">SkyUnits::Solar</span> <span class="op">=</span> <span class="ident">units</span> {
             <span class="ident">diff_illum</span> <span class="op">=</span> <span class="ident">diffuse_horizontal_irrad</span> <span class="op">*</span> <span class="ident">WHTEFFICACY</span>;
-            <span class="comment">// dir_illum = direct_normal_irrad * WHTEFFICACY;</span>
+            <span class="ident">dir_illum</span> <span class="op">=</span> <span class="ident">direct_normal_irrad</span> <span class="op">*</span> <span class="ident">WHTEFFICACY</span>;
         }
-        <span class="comment">/*
-
-            ... for later
-                /* Compute ground radiance (include solar contribution if any) */
-                parr[0] = diff_illum;
-                if (altitude &gt; 0)
-                    parr[0] += dir_illum * sin(altitude);
-                parr[2] = parr[1] = parr[0] *= (1./PI/WHTEFFICACY);
-                multcolor(parr, grefl);
-        */</span>
+        
+        
 
         <span class="comment">// Calculate Perez params</span>
         <span class="kw">let</span> <span class="ident">params</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::calc_params</span>(<span class="ident">zenith</span>, <span class="ident">sky_clearness</span>, <span class="ident">sky_brightness</span>);
 
         <span class="comment">// Build closure</span>
         <span class="kw">let</span> <span class="ident">ret</span> <span class="op">=</span> <span class="kw">move</span> <span class="op">|</span><span class="ident">dir</span>: <span class="ident">Vector3D</span><span class="op">|</span> -&gt; <span class="ident">Float</span> {
-            <span class="macro">debug_assert!</span>((<span class="number">1.</span> <span class="op">-</span> <span class="ident">dir</span>.<span class="ident">length</span>()) <span class="op">&lt;</span> <span class="number">1e-5</span>);
+            <span class="macro">debug_assert!</span>((<span class="number">1.</span> <span class="op">-</span> <span class="ident">dir</span>.<span class="ident">length</span>()) <span class="op">&lt;</span> <span class="number">1e-5</span>);            
 
             <span class="kw">let</span> <span class="ident">cosgamma</span> <span class="op">=</span> <span class="ident">sun_position</span> <span class="op">*</span> <span class="ident">dir</span>;
             <span class="kw">let</span> <span class="ident">gamma</span> <span class="op">=</span> <span class="ident">cosgamma</span>.<span class="ident">acos</span>();
@@ -1643,7 +1686,19 @@ SOFTWARE.
         <span class="kw">let</span> <span class="ident">norm_diff_illum</span> <span class="op">=</span> <span class="ident">diff_illum</span> <span class="op">/</span> (<span class="ident">norm_diff_illum</span> <span class="op">*</span> <span class="ident">WHTEFFICACY</span>);
 
         <span class="comment">// Return</span>
-        <span class="ident">Box::new</span>(<span class="kw">move</span> <span class="op">|</span><span class="ident">dir</span>: <span class="ident">Vector3D</span><span class="op">|</span> -&gt; <span class="ident">Float</span> { <span class="ident">ret</span>(<span class="ident">dir</span>) <span class="op">*</span> <span class="ident">norm_diff_illum</span> })
+        <span class="ident">Box::new</span>(<span class="kw">move</span> <span class="op">|</span><span class="ident">dir</span>: <span class="ident">Vector3D</span><span class="op">|</span> -&gt; <span class="ident">Float</span> { 
+            <span class="comment">// If ground</span>
+            <span class="kw">if</span> <span class="ident">dir</span>.<span class="ident">z</span> <span class="op">&lt;</span><span class="op">=</span> <span class="number">0.0</span> {
+                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">global_horizontal</span> <span class="op">=</span> <span class="ident">diff_illum</span>;
+                <span class="kw">if</span> <span class="ident">cos_zenit</span> <span class="op">&gt;</span> <span class="number">0.</span> {                    
+                    <span class="ident">global_horizontal</span> <span class="op">+</span><span class="op">=</span> <span class="ident">dir_illum</span> <span class="op">*</span> <span class="ident">cos_zenit</span>;
+                }
+                <span class="kw">let</span> <span class="ident">ground</span> <span class="op">=</span> <span class="ident">albedo</span> <span class="op">*</span> <span class="ident">global_horizontal</span> <span class="op">/</span> <span class="ident">PI</span><span class="op">/</span><span class="ident">WHTEFFICACY</span>;                
+                <span class="kw">return</span> <span class="ident">ground</span>;
+            }
+            <span class="comment">// If sky</span>
+            <span class="ident">ret</span>(<span class="ident">dir</span>) <span class="op">*</span> <span class="ident">norm_diff_illum</span> 
+        })
     }
 
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">gen_sky_vec</span>(
@@ -1652,10 +1707,13 @@ SOFTWARE.
         <span class="ident">date</span>: <span class="ident">Date</span>,
         <span class="ident">weather_data</span>: <span class="ident">CurrentWeather</span>,
         <span class="ident">units</span>: <span class="ident">SkyUnits</span>,
+        <span class="ident">albedo</span>: <span class="ident">Float</span>,
+        <span class="ident">add_sky</span>: <span class="ident">bool</span>,
+        <span class="ident">add_sun</span>: <span class="ident">bool</span>,
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Matrix</span>, <span class="ident">String</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">r</span> <span class="op">=</span> <span class="ident">ReinhartSky::new</span>(<span class="ident">mf</span>);
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">vec</span> <span class="op">=</span> <span class="ident">Matrix::new</span>(<span class="number">0.0</span>, <span class="ident">r</span>.<span class="ident">n_bins</span>, <span class="number">1</span>);
-        <span class="ident"><span class="self">Self</span>::update_sky_vec</span>(<span class="kw-2">&amp;mut</span> <span class="ident">vec</span>, <span class="ident">mf</span>, <span class="ident">solar</span>, <span class="ident">date</span>, <span class="ident">weather_data</span>, <span class="ident">units</span>)<span class="question-mark">?</span>;
+        <span class="ident"><span class="self">Self</span>::update_sky_vec</span>(<span class="kw-2">&amp;mut</span> <span class="ident">vec</span>, <span class="ident">mf</span>, <span class="ident">solar</span>, <span class="ident">date</span>, <span class="ident">weather_data</span>, <span class="ident">units</span>, <span class="ident">albedo</span>, <span class="ident">add_sky</span>, <span class="ident">add_sun</span>)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(<span class="ident">vec</span>)
     }
 
@@ -1666,8 +1724,10 @@ SOFTWARE.
         <span class="ident">date</span>: <span class="ident">Date</span>,
         <span class="ident">weather_data</span>: <span class="ident">CurrentWeather</span>,
         <span class="ident">units</span>: <span class="ident">SkyUnits</span>,
-    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">String</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">add_sky</span> <span class="op">=</span> <span class="bool-val">true</span>;        
+        <span class="ident">albedo</span>: <span class="ident">Float</span>,
+        <span class="ident">add_sky</span>: <span class="ident">bool</span>,
+        <span class="ident">add_sun</span>: <span class="ident">bool</span>,
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">String</span><span class="op">&gt;</span> {        
 
         <span class="kw">let</span> <span class="ident">r</span> <span class="op">=</span> <span class="ident">ReinhartSky::new</span>(<span class="ident">mf</span>);
         <span class="kw">let</span> (<span class="ident">rows</span>, <span class="ident">cols</span>) <span class="op">=</span> <span class="ident">vec</span>.<span class="ident">size</span>();
@@ -1701,6 +1761,14 @@ SOFTWARE.
             <span class="prelude-val">Some</span>(<span class="ident">v</span>) =&gt; <span class="ident">v</span>,
         };
 
+        <span class="comment">// If it is nighttime, just fill with zeroes</span>
+        <span class="kw">if</span> <span class="ident">direct_normal_irrad</span> <span class="op">+</span> <span class="ident">diffuse_horizontal_irrad</span> <span class="op">&lt;</span> <span class="number">1e-4</span> {            
+            <span class="kw">for</span> <span class="ident">bin</span> <span class="kw">in</span> <span class="number">0</span>..<span class="ident">r</span>.<span class="ident">n_bins</span> {                                
+                <span class="ident">vec</span>.<span class="ident">set</span>(<span class="ident">bin</span>, <span class="number">0</span>, <span class="number">0.0</span>)<span class="question-mark">?</span>;
+            }
+            <span class="kw">return</span> <span class="prelude-val">Ok</span>(())
+        }
+
         <span class="kw">if</span> <span class="ident">add_sky</span> {
             <span class="kw">let</span> <span class="ident">sky_func</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::get_sky_func_standard_time</span>(
                 <span class="ident">units</span>,
@@ -1709,10 +1777,13 @@ SOFTWARE.
                 <span class="ident">dew_point</span>,
                 <span class="ident">diffuse_horizontal_irrad</span>,
                 <span class="ident">direct_normal_irrad</span>,
+                <span class="ident">albedo</span>,
             );
+
             <span class="kw">for</span> <span class="ident">bin</span> <span class="kw">in</span> <span class="number">0</span>..<span class="ident">r</span>.<span class="ident">n_bins</span> {
+                
                 <span class="kw">let</span> <span class="ident">dir</span> <span class="op">=</span> <span class="ident">r</span>.<span class="ident">bin_dir</span>(<span class="ident">bin</span>);
-                <span class="kw">let</span> <span class="ident">v</span> <span class="op">=</span> <span class="ident">sky_func</span>(<span class="ident">dir</span>);
+                <span class="kw">let</span> <span class="ident">v</span> <span class="op">=</span> <span class="ident">sky_func</span>(<span class="ident">dir</span>);                
                 <span class="ident">vec</span>.<span class="ident">set</span>(<span class="ident">bin</span>, <span class="number">0</span>, <span class="ident">v</span>)<span class="question-mark">?</span>;
             }
         }
@@ -1729,25 +1800,28 @@ SOFTWARE.
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_gen_sky_vec</span>() {
         <span class="kw">let</span> <span class="ident">mf</span> <span class="op">=</span> <span class="number">1</span>;
-        <span class="kw">let</span> <span class="ident">lat</span> <span class="op">=</span> <span class="op">-</span><span class="number">41.3</span> <span class="op">*</span> <span class="ident">PI</span> <span class="op">/</span> <span class="number">180.</span>;        
-        <span class="kw">let</span> <span class="ident">lon</span> <span class="op">=</span> <span class="op">-</span><span class="number">174.78</span> <span class="op">*</span> <span class="ident">PI</span> <span class="op">/</span> <span class="number">180.</span>;
+        <span class="kw">let</span> <span class="ident">lat</span> <span class="op">=</span> <span class="op">-</span><span class="number">41.41</span> <span class="op">*</span> <span class="ident">PI</span> <span class="op">/</span> <span class="number">180.</span>;        
+        <span class="kw">let</span> <span class="ident">lon</span> <span class="op">=</span> <span class="op">-</span><span class="number">174.87</span> <span class="op">*</span> <span class="ident">PI</span> <span class="op">/</span> <span class="number">180.</span>;
         <span class="kw">let</span> <span class="ident">std_mer</span> <span class="op">=</span> <span class="op">-</span><span class="number">180.</span> <span class="op">*</span> <span class="ident">PI</span> <span class="op">/</span> <span class="number">180.</span>;
         <span class="kw">let</span> <span class="ident">month</span> <span class="op">=</span> <span class="number">1</span>;
         <span class="kw">let</span> <span class="ident">day</span> <span class="op">=</span> <span class="number">1</span>;
         <span class="kw">let</span> <span class="ident">hour</span> <span class="op">=</span> <span class="number">5.5</span>;
         <span class="kw">let</span> <span class="ident">date</span> <span class="op">=</span> <span class="ident">Date</span> { <span class="ident">month</span>, <span class="ident">day</span>, <span class="ident">hour</span> };
         <span class="kw">let</span> <span class="ident">solar</span> <span class="op">=</span> <span class="ident">Solar::new</span>(<span class="ident">lat</span>, <span class="ident">lon</span>, <span class="ident">std_mer</span>);
+        <span class="kw">let</span> <span class="ident">albedo</span> <span class="op">=</span> <span class="number">0.2</span>;
+        <span class="kw">let</span> <span class="ident">add_sky</span> <span class="op">=</span> <span class="bool-val">true</span>;
+        <span class="kw">let</span> <span class="ident">add_sun</span> <span class="op">=</span> <span class="bool-val">false</span>;
 
         <span class="kw">let</span> <span class="ident">weather_data</span> <span class="op">=</span> <span class="ident">CurrentWeather</span> {
             <span class="ident">dew_point_temperature</span>: <span class="prelude-val">Some</span>(<span class="number">11.</span>),
-            <span class="ident">direct_normal_radiation</span>: <span class="prelude-val">Some</span>(<span class="number">51.</span>),
-            <span class="ident">diffuse_horizontal_radiation</span>: <span class="prelude-val">Some</span>(<span class="number">36.</span>),
+            <span class="ident">direct_normal_radiation</span>: <span class="prelude-val">Some</span>(<span class="number">538.</span>),
+            <span class="ident">diffuse_horizontal_radiation</span>: <span class="prelude-val">Some</span>(<span class="number">25.</span>),
 
             ..<span class="ident">CurrentWeather::default</span>()
         };
-        <span class="kw">let</span> <span class="ident">units</span> <span class="op">=</span> <span class="ident">SkyUnits::Solar</span>;
+        <span class="kw">let</span> <span class="ident">units</span> <span class="op">=</span> <span class="ident">SkyUnits::Visible</span>;
 
-        <span class="kw">let</span> <span class="ident">vec</span> <span class="op">=</span> <span class="ident">PerezSky::gen_sky_vec</span>(<span class="ident">mf</span>, <span class="kw-2">&amp;</span><span class="ident">solar</span>, <span class="ident">date</span>, <span class="ident">weather_data</span>, <span class="ident">units</span>).<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="ident">vec</span> <span class="op">=</span> <span class="ident">PerezSky::gen_sky_vec</span>(<span class="ident">mf</span>, <span class="kw-2">&amp;</span><span class="ident">solar</span>, <span class="ident">date</span>, <span class="ident">weather_data</span>, <span class="ident">units</span>, <span class="ident">albedo</span>, <span class="ident">add_sky</span>, <span class="ident">add_sun</span>).<span class="ident">unwrap</span>();
         <span class="macro">println!</span>(<span class="string">&quot;{}&quot;</span>, <span class="ident">vec</span>);
     }
 
@@ -1773,6 +1847,7 @@ SOFTWARE.
             <span class="ident">dew_point</span>,
             <span class="ident">diffuse_horizontal_irrad</span>,
             <span class="ident">direct_normal_irrad</span>,
+            <span class="number">0.2</span>,
         );
         <span class="kw">let</span> <span class="ident">found</span> <span class="op">=</span> <span class="ident">fun</span>(<span class="ident">Vector3D::new</span>(
             <span class="number">0.04327423224079154</span>,
@@ -1810,6 +1885,7 @@ SOFTWARE.
             <span class="ident">dew_point</span>,
             <span class="ident">diffuse_horizontal_irrad</span>,
             <span class="ident">direct_normal_irrad</span>,
+            <span class="number">0.2</span>,
         );
         <span class="kw">let</span> <span class="ident">found</span> <span class="op">=</span> <span class="ident">fun</span>(<span class="ident">Vector3D::new</span>(<span class="number">0.0</span>, <span class="op">-</span><span class="number">0.9987523388778446</span>, <span class="number">0.04993761694389223</span>));
         <span class="comment">// Automatically generated using command: gendaylit 2 2 12.0 -W 500.0 200.0 -a 1 -o 1 -m 1 -O 0 | tail -n 1 | rcalc  -e &#39;A1=$2; A2=$3; A3=$4; A4=$5; A5=$6; A6=$7; A7=$8; A8=$9; A9=$10; A10=$11; Dx=0.0;  Dy=-0.9987523388778446; Dz=0.04993761694389223&#39; -f ./perezlum.cal -o &#39;${intersky}&#39;</span>
@@ -1843,6 +1919,7 @@ SOFTWARE.
             <span class="ident">dew_point</span>,
             <span class="ident">diffuse_horizontal_irrad</span>,
             <span class="ident">direct_normal_irrad</span>,
+            <span class="number">0.2</span>,
         );
         <span class="kw">let</span> <span class="ident">found</span> <span class="op">=</span> <span class="ident">fun</span>(<span class="ident">Vector3D::new</span>(<span class="op">-</span><span class="number">0.9912279006826347</span>, <span class="number">0.0</span>, <span class="number">0.13216372009101796</span>));
         <span class="comment">// Automatically generated using command: gendaylit 2 2 12.0 -W 500.0 200.0 -a 1 -o 1 -m 1 -O 0 | tail -n 1 | rcalc  -e &#39;A1=$2; A2=$3; A3=$4; A4=$5; A5=$6; A6=$7; A7=$8; A8=$9; A9=$10; A10=$11; Dx=-0.9912279006826347;  Dy=0.0; Dz=0.13216372009101796&#39; -f ./perezlum.cal -o &#39;${intersky}&#39;</span>
@@ -1876,6 +1953,7 @@ SOFTWARE.
             <span class="ident">dew_point</span>,
             <span class="ident">diffuse_horizontal_irrad</span>,
             <span class="ident">direct_normal_irrad</span>,
+            <span class="number">0.2</span>,
         );
         <span class="kw">let</span> <span class="ident">found</span> <span class="op">=</span> <span class="ident">fun</span>(<span class="ident">Vector3D::new</span>(
             <span class="number">0.04327423224079154</span>,
@@ -1913,6 +1991,7 @@ SOFTWARE.
             <span class="ident">dew_point</span>,
             <span class="ident">diffuse_horizontal_irrad</span>,
             <span class="ident">direct_normal_irrad</span>,
+            <span class="number">0.2</span>,
         );
         <span class="kw">let</span> <span class="ident">found</span> <span class="op">=</span> <span class="ident">fun</span>(<span class="ident">Vector3D::new</span>(<span class="number">0.0</span>, <span class="op">-</span><span class="number">0.9987523388778446</span>, <span class="number">0.04993761694389223</span>));
         <span class="comment">// Automatically generated using command: gendaylit 4 5 10.0 -W 600.0 200.0 -a -33 -o -40 -m -40 -O 0 | tail -n 1 | rcalc  -e &#39;A1=$2; A2=$3; A3=$4; A4=$5; A5=$6; A6=$7; A7=$8; A8=$9; A9=$10; A10=$11; Dx=0.0;  Dy=-0.9987523388778446; Dz=0.04993761694389223&#39; -f ./perezlum.cal -o &#39;${intersky}&#39;</span>
@@ -1946,6 +2025,7 @@ SOFTWARE.
             <span class="ident">dew_point</span>,
             <span class="ident">diffuse_horizontal_irrad</span>,
             <span class="ident">direct_normal_irrad</span>,
+            <span class="number">0.2</span>,
         );
         <span class="kw">let</span> <span class="ident">found</span> <span class="op">=</span> <span class="ident">fun</span>(<span class="ident">Vector3D::new</span>(<span class="op">-</span><span class="number">0.9912279006826347</span>, <span class="number">0.0</span>, <span class="number">0.13216372009101796</span>));
         <span class="comment">// Automatically generated using command: gendaylit 4 5 10.0 -W 600.0 200.0 -a -33 -o -40 -m -40 -O 0 | tail -n 1 | rcalc  -e &#39;A1=$2; A2=$3; A3=$4; A4=$5; A5=$6; A6=$7; A7=$8; A8=$9; A9=$10; A10=$11; Dx=-0.9912279006826347;  Dy=0.0; Dz=0.13216372009101796&#39; -f ./perezlum.cal -o &#39;${intersky}&#39;</span>
@@ -1975,6 +2055,7 @@ SOFTWARE.
             <span class="ident">dew_point</span>,
             <span class="ident">diffuse_horizontal_irrad</span>,
             <span class="ident">direct_normal_irrad</span>,
+            <span class="number">0.2</span>,
         );
         <span class="kw">let</span> <span class="ident">found</span> <span class="op">=</span> <span class="ident">fun</span>(<span class="ident">Vector3D::new</span>(
             <span class="number">0.04327423224079154</span>,
@@ -2008,6 +2089,7 @@ SOFTWARE.
             <span class="ident">dew_point</span>,
             <span class="ident">diffuse_horizontal_irrad</span>,
             <span class="ident">direct_normal_irrad</span>,
+            <span class="number">0.2</span>,
         );
         <span class="kw">let</span> <span class="ident">found</span> <span class="op">=</span> <span class="ident">fun</span>(<span class="ident">Vector3D::new</span>(<span class="number">0.0</span>, <span class="op">-</span><span class="number">0.9987523388778446</span>, <span class="number">0.04993761694389223</span>));
         <span class="comment">// Automatically generated using command: gendaylit 11 7 16.0 -W 900.0 100.0 -a -47 -o 47 -m 47 -O 0 | tail -n 1 | rcalc  -e &#39;A1=$2; A2=$3; A3=$4; A4=$5; A5=$6; A6=$7; A7=$8; A8=$9; A9=$10; A10=$11; Dx=0.0;  Dy=-0.9987523388778446; Dz=0.04993761694389223&#39; -f ./perezlum.cal -o &#39;${intersky}&#39;</span>
@@ -2037,6 +2119,7 @@ SOFTWARE.
             <span class="ident">dew_point</span>,
             <span class="ident">diffuse_horizontal_irrad</span>,
             <span class="ident">direct_normal_irrad</span>,
+            <span class="number">0.2</span>,
         );
         <span class="kw">let</span> <span class="ident">found</span> <span class="op">=</span> <span class="ident">fun</span>(<span class="ident">Vector3D::new</span>(<span class="op">-</span><span class="number">0.9912279006826347</span>, <span class="number">0.0</span>, <span class="number">0.13216372009101796</span>));
         <span class="comment">// Automatically generated using command: gendaylit 11 7 16.0 -W 900.0 100.0 -a -47 -o 47 -m 47 -O 0 | tail -n 1 | rcalc  -e &#39;A1=$2; A2=$3; A3=$4; A4=$5; A5=$6; A6=$7; A7=$8; A8=$9; A9=$10; A10=$11; Dx=-0.9912279006826347;  Dy=0.0; Dz=0.13216372009101796&#39; -f ./perezlum.cal -o &#39;${intersky}&#39;</span>
@@ -2066,6 +2149,7 @@ SOFTWARE.
             <span class="ident">dew_point</span>,
             <span class="ident">diffuse_horizontal_irrad</span>,
             <span class="ident">direct_normal_irrad</span>,
+            <span class="number">0.2</span>,
         );
         <span class="kw">let</span> <span class="ident">found</span> <span class="op">=</span> <span class="ident">fun</span>(<span class="ident">Vector3D::new</span>(
             <span class="number">0.04327423224079154</span>,
@@ -2099,6 +2183,7 @@ SOFTWARE.
             <span class="ident">dew_point</span>,
             <span class="ident">diffuse_horizontal_irrad</span>,
             <span class="ident">direct_normal_irrad</span>,
+            <span class="number">0.2</span>,
         );
         <span class="kw">let</span> <span class="ident">found</span> <span class="op">=</span> <span class="ident">fun</span>(<span class="ident">Vector3D::new</span>(<span class="number">0.0</span>, <span class="op">-</span><span class="number">0.9987523388778446</span>, <span class="number">0.04993761694389223</span>));
         <span class="comment">// Automatically generated using command: gendaylit 1 1 13.0 -W 300.0 300.0 -a 47 -o 12 -m 12 -O 0 | tail -n 1 | rcalc  -e &#39;A1=$2; A2=$3; A3=$4; A4=$5; A5=$6; A6=$7; A7=$8; A8=$9; A9=$10; A10=$11; Dx=0.0;  Dy=-0.9987523388778446; Dz=0.04993761694389223&#39; -f ./perezlum.cal -o &#39;${intersky}&#39;</span>
@@ -2128,6 +2213,7 @@ SOFTWARE.
             <span class="ident">dew_point</span>,
             <span class="ident">diffuse_horizontal_irrad</span>,
             <span class="ident">direct_normal_irrad</span>,
+            <span class="number">0.2</span>,
         );
         <span class="kw">let</span> <span class="ident">found</span> <span class="op">=</span> <span class="ident">fun</span>(<span class="ident">Vector3D::new</span>(<span class="op">-</span><span class="number">0.9912279006826347</span>, <span class="number">0.0</span>, <span class="number">0.13216372009101796</span>));
         <span class="comment">// Automatically generated using command: gendaylit 1 1 13.0 -W 300.0 300.0 -a 47 -o 12 -m 12 -O 0 | tail -n 1 | rcalc  -e &#39;A1=$2; A2=$3; A3=$4; A4=$5; A5=$6; A6=$7; A7=$8; A8=$9; A9=$10; A10=$11; Dx=-0.9912279006826347;  Dy=0.0; Dz=0.13216372009101796&#39; -f ./perezlum.cal -o &#39;${intersky}&#39;</span>
@@ -2164,6 +2250,7 @@ SOFTWARE.
             <span class="ident">dew_point</span>,
             <span class="ident">diffuse_horizontal_irrad</span>,
             <span class="ident">direct_normal_irrad</span>,
+            <span class="number">0.2</span>,
         );
         <span class="kw">let</span> <span class="ident">found</span> <span class="op">=</span> <span class="ident">fun</span>(<span class="ident">Vector3D::new</span>(
             <span class="number">0.04327423224079154</span>,
@@ -2201,6 +2288,7 @@ SOFTWARE.
             <span class="ident">dew_point</span>,
             <span class="ident">diffuse_horizontal_irrad</span>,
             <span class="ident">direct_normal_irrad</span>,
+            <span class="number">0.2</span>,
         );
         <span class="kw">let</span> <span class="ident">found</span> <span class="op">=</span> <span class="ident">fun</span>(<span class="ident">Vector3D::new</span>(<span class="number">0.0</span>, <span class="op">-</span><span class="number">0.9987523388778446</span>, <span class="number">0.04993761694389223</span>));
         <span class="comment">// Automatically generated using command: gendaylit 2 2 12.0 -W 500.0 200.0 -a 1 -o 1 -m 1 -O 1 | tail -n 1 | rcalc  -e &#39;A1=$2; A2=$3; A3=$4; A4=$5; A5=$6; A6=$7; A7=$8; A8=$9; A9=$10; A10=$11; Dx=0.0;  Dy=-0.9987523388778446; Dz=0.04993761694389223&#39; -f ./perezlum.cal -o &#39;${intersky}&#39;</span>
@@ -2234,6 +2322,7 @@ SOFTWARE.
             <span class="ident">dew_point</span>,
             <span class="ident">diffuse_horizontal_irrad</span>,
             <span class="ident">direct_normal_irrad</span>,
+            <span class="number">0.2</span>,
         );
         <span class="kw">let</span> <span class="ident">found</span> <span class="op">=</span> <span class="ident">fun</span>(<span class="ident">Vector3D::new</span>(<span class="op">-</span><span class="number">0.9912279006826347</span>, <span class="number">0.0</span>, <span class="number">0.13216372009101796</span>));
         <span class="comment">// Automatically generated using command: gendaylit 2 2 12.0 -W 500.0 200.0 -a 1 -o 1 -m 1 -O 1 | tail -n 1 | rcalc  -e &#39;A1=$2; A2=$3; A3=$4; A4=$5; A5=$6; A6=$7; A7=$8; A8=$9; A9=$10; A10=$11; Dx=-0.9912279006826347;  Dy=0.0; Dz=0.13216372009101796&#39; -f ./perezlum.cal -o &#39;${intersky}&#39;</span>
@@ -2267,6 +2356,7 @@ SOFTWARE.
             <span class="ident">dew_point</span>,
             <span class="ident">diffuse_horizontal_irrad</span>,
             <span class="ident">direct_normal_irrad</span>,
+            <span class="number">0.2</span>,
         );
         <span class="kw">let</span> <span class="ident">found</span> <span class="op">=</span> <span class="ident">fun</span>(<span class="ident">Vector3D::new</span>(
             <span class="number">0.04327423224079154</span>,
@@ -2304,6 +2394,7 @@ SOFTWARE.
             <span class="ident">dew_point</span>,
             <span class="ident">diffuse_horizontal_irrad</span>,
             <span class="ident">direct_normal_irrad</span>,
+            <span class="number">0.2</span>,
         );
         <span class="kw">let</span> <span class="ident">found</span> <span class="op">=</span> <span class="ident">fun</span>(<span class="ident">Vector3D::new</span>(<span class="number">0.0</span>, <span class="op">-</span><span class="number">0.9987523388778446</span>, <span class="number">0.04993761694389223</span>));
         <span class="comment">// Automatically generated using command: gendaylit 4 5 10.0 -W 600.0 200.0 -a -33 -o -40 -m -40 -O 1 | tail -n 1 | rcalc  -e &#39;A1=$2; A2=$3; A3=$4; A4=$5; A5=$6; A6=$7; A7=$8; A8=$9; A9=$10; A10=$11; Dx=0.0;  Dy=-0.9987523388778446; Dz=0.04993761694389223&#39; -f ./perezlum.cal -o &#39;${intersky}&#39;</span>
@@ -2337,6 +2428,7 @@ SOFTWARE.
             <span class="ident">dew_point</span>,
             <span class="ident">diffuse_horizontal_irrad</span>,
             <span class="ident">direct_normal_irrad</span>,
+            <span class="number">0.2</span>,
         );
         <span class="kw">let</span> <span class="ident">found</span> <span class="op">=</span> <span class="ident">fun</span>(<span class="ident">Vector3D::new</span>(<span class="op">-</span><span class="number">0.9912279006826347</span>, <span class="number">0.0</span>, <span class="number">0.13216372009101796</span>));
         <span class="comment">// Automatically generated using command: gendaylit 4 5 10.0 -W 600.0 200.0 -a -33 -o -40 -m -40 -O 1 | tail -n 1 | rcalc  -e &#39;A1=$2; A2=$3; A3=$4; A4=$5; A5=$6; A6=$7; A7=$8; A8=$9; A9=$10; A10=$11; Dx=-0.9912279006826347;  Dy=0.0; Dz=0.13216372009101796&#39; -f ./perezlum.cal -o &#39;${intersky}&#39;</span>
@@ -2366,6 +2458,7 @@ SOFTWARE.
             <span class="ident">dew_point</span>,
             <span class="ident">diffuse_horizontal_irrad</span>,
             <span class="ident">direct_normal_irrad</span>,
+            <span class="number">0.2</span>,
         );
         <span class="kw">let</span> <span class="ident">found</span> <span class="op">=</span> <span class="ident">fun</span>(<span class="ident">Vector3D::new</span>(
             <span class="number">0.04327423224079154</span>,
@@ -2399,6 +2492,7 @@ SOFTWARE.
             <span class="ident">dew_point</span>,
             <span class="ident">diffuse_horizontal_irrad</span>,
             <span class="ident">direct_normal_irrad</span>,
+            <span class="number">0.2</span>,
         );
         <span class="kw">let</span> <span class="ident">found</span> <span class="op">=</span> <span class="ident">fun</span>(<span class="ident">Vector3D::new</span>(<span class="number">0.0</span>, <span class="op">-</span><span class="number">0.9987523388778446</span>, <span class="number">0.04993761694389223</span>));
         <span class="comment">// Automatically generated using command: gendaylit 11 7 16.0 -W 900.0 100.0 -a -47 -o 47 -m 47 -O 1 | tail -n 1 | rcalc  -e &#39;A1=$2; A2=$3; A3=$4; A4=$5; A5=$6; A6=$7; A7=$8; A8=$9; A9=$10; A10=$11; Dx=0.0;  Dy=-0.9987523388778446; Dz=0.04993761694389223&#39; -f ./perezlum.cal -o &#39;${intersky}&#39;</span>
@@ -2428,6 +2522,7 @@ SOFTWARE.
             <span class="ident">dew_point</span>,
             <span class="ident">diffuse_horizontal_irrad</span>,
             <span class="ident">direct_normal_irrad</span>,
+            <span class="number">0.2</span>,
         );
         <span class="kw">let</span> <span class="ident">found</span> <span class="op">=</span> <span class="ident">fun</span>(<span class="ident">Vector3D::new</span>(<span class="op">-</span><span class="number">0.9912279006826347</span>, <span class="number">0.0</span>, <span class="number">0.13216372009101796</span>));
         <span class="comment">// Automatically generated using command: gendaylit 11 7 16.0 -W 900.0 100.0 -a -47 -o 47 -m 47 -O 1 | tail -n 1 | rcalc  -e &#39;A1=$2; A2=$3; A3=$4; A4=$5; A5=$6; A6=$7; A7=$8; A8=$9; A9=$10; A10=$11; Dx=-0.9912279006826347;  Dy=0.0; Dz=0.13216372009101796&#39; -f ./perezlum.cal -o &#39;${intersky}&#39;</span>
@@ -2457,6 +2552,7 @@ SOFTWARE.
             <span class="ident">dew_point</span>,
             <span class="ident">diffuse_horizontal_irrad</span>,
             <span class="ident">direct_normal_irrad</span>,
+            <span class="number">0.2</span>,
         );
         <span class="kw">let</span> <span class="ident">found</span> <span class="op">=</span> <span class="ident">fun</span>(<span class="ident">Vector3D::new</span>(
             <span class="number">0.04327423224079154</span>,
@@ -2490,6 +2586,7 @@ SOFTWARE.
             <span class="ident">dew_point</span>,
             <span class="ident">diffuse_horizontal_irrad</span>,
             <span class="ident">direct_normal_irrad</span>,
+            <span class="number">0.2</span>,
         );
         <span class="kw">let</span> <span class="ident">found</span> <span class="op">=</span> <span class="ident">fun</span>(<span class="ident">Vector3D::new</span>(<span class="number">0.0</span>, <span class="op">-</span><span class="number">0.9987523388778446</span>, <span class="number">0.04993761694389223</span>));
         <span class="comment">// Automatically generated using command: gendaylit 1 1 13.0 -W 300.0 300.0 -a 47 -o 12 -m 12 -O 1 | tail -n 1 | rcalc  -e &#39;A1=$2; A2=$3; A3=$4; A4=$5; A5=$6; A6=$7; A7=$8; A8=$9; A9=$10; A10=$11; Dx=0.0;  Dy=-0.9987523388778446; Dz=0.04993761694389223&#39; -f ./perezlum.cal -o &#39;${intersky}&#39;</span>
@@ -2519,6 +2616,7 @@ SOFTWARE.
             <span class="ident">dew_point</span>,
             <span class="ident">diffuse_horizontal_irrad</span>,
             <span class="ident">direct_normal_irrad</span>,
+            <span class="number">0.2</span>,
         );
         <span class="kw">let</span> <span class="ident">found</span> <span class="op">=</span> <span class="ident">fun</span>(<span class="ident">Vector3D::new</span>(<span class="op">-</span><span class="number">0.9912279006826347</span>, <span class="number">0.0</span>, <span class="number">0.13216372009101796</span>));
         <span class="comment">// Automatically generated using command: gendaylit 1 1 13.0 -W 300.0 300.0 -a 47 -o 12 -m 12 -O 1 | tail -n 1 | rcalc  -e &#39;A1=$2; A2=$3; A3=$4; A4=$5; A5=$6; A6=$7; A7=$8; A8=$9; A9=$10; A10=$11; Dx=-0.9912279006826347;  Dy=0.0; Dz=0.13216372009101796&#39; -f ./perezlum.cal -o &#39;${intersky}&#39;</span>
