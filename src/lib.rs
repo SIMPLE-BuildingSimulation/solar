@@ -23,7 +23,7 @@ use geometry3d::Vector3D;
 mod reinhart_sky;
 pub use reinhart_sky::ReinhartSky;
 mod perez;
-pub use perez::PerezSky;
+pub use perez::{PerezSky, SkyUnits};
 
 /// The kind of Floating point number used in the
 /// library... the `"float"` feature means it becomes `f32`
