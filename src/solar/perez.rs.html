@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src&#x2F;perez.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>perez.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><script defer src="../../main.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src&#x2F;perez.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>perez.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><script defer src="../../main.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script>
     <noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.9.0/dist/katex.min.css" integrity="sha384-TEMocfGvRuD1rIAacqrknm5BQZ7W7uWitoih+jMNFXQIbNl16bO8OZmylH/Vi/Ei" crossorigin="anonymous">
 <script src="https://cdn.jsdelivr.net/npm/katex@0.9.0/dist/katex.min.js" integrity="sha384-jmxIlussZWB7qCuB+PgKG1uLjjxbVVIayPJwi6cG6Zb4YKq0JIw+OMnkkEC7kYCq" crossorigin="anonymous"></script>
 <script>
@@ -33,7 +33,8 @@
   });
 </script>
 
-<style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../solar/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">   1</span>
+</head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a class="sidebar-logo" href="../../solar/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.png" alt="logo"></div>
+        </a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../solar/index.html"><img class="rust-logo" src="../../rust-logo.png" alt="logo"></a><nav class="sub"><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">   1</span>
 <span id="2">   2</span>
 <span id="3">   3</span>
 <span id="4">   4</span>
@@ -1853,6 +1854,17 @@
 <span id="1818">1818</span>
 <span id="1819">1819</span>
 <span id="1820">1820</span>
+<span id="1821">1821</span>
+<span id="1822">1822</span>
+<span id="1823">1823</span>
+<span id="1824">1824</span>
+<span id="1825">1825</span>
+<span id="1826">1826</span>
+<span id="1827">1827</span>
+<span id="1828">1828</span>
+<span id="1829">1829</span>
+<span id="1830">1830</span>
+<span id="1831">1831</span>
 </pre><pre class="rust"><code><span class="comment">/*
 MIT License
 Copyright (c) 2021 Germán Molina
@@ -2285,7 +2297,16 @@ SOFTWARE.
         and then here... refactoring might help
         */</span>
         <span class="kw">let</span> <span class="ident">day</span> <span class="op">=</span> <span class="ident">Time::Standard</span>(<span class="ident">date</span>.<span class="ident">day_of_year</span>());
-        <span class="kw">let</span> <span class="ident">sun_position</span> <span class="op">=</span> <span class="ident">solar</span>.<span class="ident">sun_position</span>(<span class="ident">day</span>).<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="ident">sun_position</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">solar</span>.<span class="ident">sun_position</span>(<span class="ident">day</span>){
+            <span class="prelude-val">Some</span>(<span class="ident">pos</span>)=&gt;<span class="ident">pos</span>,
+            <span class="prelude-val">None</span> =&gt;{
+                <span class="kw">for</span> <span class="ident">bin</span> <span class="kw">in</span> <span class="number">0</span>..<span class="ident">r</span>.<span class="ident">n_bins</span> {                                
+                    <span class="ident">vec</span>.<span class="ident">set</span>(<span class="ident">bin</span>, <span class="number">0</span>, <span class="number">0.0</span>)<span class="question-mark">?</span>;
+                }
+                <span class="kw">return</span> <span class="prelude-val">Ok</span>(())
+            }
+
+        };
         <span class="kw">let</span> <span class="ident">day</span> <span class="op">=</span> <span class="ident">solar</span>.<span class="ident">unwrap_solar_time</span>(<span class="ident">day</span>);
         <span class="kw">let</span> <span class="ident">cos_zenit</span> <span class="op">=</span> <span class="ident">sun_position</span>.<span class="ident">z</span>;
         <span class="kw">let</span> <span class="ident">zenith</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">cos_zenit</span> <span class="op">&lt;</span><span class="op">=</span> <span class="number">0.</span> {
@@ -2391,7 +2412,7 @@ SOFTWARE.
             
             <span class="kw">for</span> <span class="ident">k</span> <span class="kw">in</span> (<span class="number">0</span>..<span class="ident">N_SUNS</span>).<span class="ident">rev</span>(){
                 <span class="comment">// What if Visible? or Solar? One of them is wrong.</span>
-                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">val_add</span> <span class="op">=</span> <span class="ident">weights</span>[<span class="ident">k</span>] <span class="op">*</span> <span class="ident">dir_illum</span> <span class="op">/</span> (<span class="ident">WHTEFFICACY</span> <span class="op">*</span> <span class="ident">tot_weight</span>);
+                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">val_add</span> <span class="op">=</span> <span class="ident">weights</span>[<span class="ident">k</span>] <span class="op">*</span> <span class="ident">dir_illum</span> <span class="op">/</span> (<span class="ident">WHTEFFICACY</span> <span class="op">*</span> <span class="ident">tot_weight</span> );
 
                 <span class="comment">// Divide by solid angle... of patch or sharp sun.</span>
                 <span class="comment">/* 
@@ -2414,113 +2435,115 @@ SOFTWARE.
 }
 
 
-<span class="kw">fn</span> <span class="ident">read_colour_matrix</span>(<span class="ident">filename</span>: <span class="ident">String</span>)-&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Matrix</span>, <span class="ident">String</span><span class="op">&gt;</span> {
-    <span class="kw">let</span> <span class="ident">content</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">std::fs::read_to_string</span>(<span class="ident">filename</span>.<span class="ident">clone</span>()){
-        <span class="prelude-val">Ok</span>(<span class="ident">v</span>)=&gt;<span class="ident">v</span>,
-        <span class="prelude-val">Err</span>(<span class="kw">_</span>)=&gt;{
-            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="macro">format!</span>(<span class="string">&quot;Could not read Matrix file &#39;{}&#39;&quot;</span>, <span class="ident">filename</span>))
-        }
-    };
-    
-    <span class="comment">// Read header</span>
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">nrows</span> : <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> <span class="op">=</span> <span class="prelude-val">None</span>;
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">ncols</span> : <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> <span class="op">=</span> <span class="prelude-val">None</span>;
-    <span class="comment">// let mut ncomp : Option&lt;usize&gt; = None;</span>
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">header_lines</span> <span class="op">=</span> <span class="number">0</span>;
-    <span class="kw">for</span> <span class="ident">line</span> <span class="kw">in</span> <span class="ident">content</span>.<span class="ident">lines</span>(){
-        <span class="ident">header_lines</span> <span class="op">+</span><span class="op">=</span><span class="number">1</span>;
-        <span class="comment">// If we reach a blank line, we are over with the header.</span>
-        <span class="kw">if</span> <span class="ident">line</span>.<span class="ident">len</span>() <span class="op">==</span> <span class="number">0</span> <span class="op">|</span><span class="op">|</span> <span class="ident">line</span>.<span class="ident">as_bytes</span>()[<span class="number">0</span>].<span class="ident">is_ascii_whitespace</span>(){
-            <span class="kw">break</span>;
-        }
 
-        <span class="kw">if</span> <span class="ident">line</span>.<span class="ident">starts_with</span>(<span class="string">&quot;NROWS&quot;</span>){
-            <span class="kw">let</span> <span class="ident">tuple</span> : <span class="ident">Vec</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">str</span><span class="op">&gt;</span><span class="op">=</span> <span class="ident">line</span>.<span class="ident">split</span>(<span class="string">&#39;=&#39;</span>).<span class="ident">collect</span>();
-            <span class="kw">if</span> <span class="ident">tuple</span>.<span class="ident">len</span>() <span class="op">!</span><span class="op">=</span> <span class="number">2</span> {
-                <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="macro">format!</span>(<span class="string">&quot;Expecting NROWS line to be in the format &#39;NROWS=number&#39;... found &#39;{}&#39;&quot;</span>, <span class="ident">line</span>));
-            }
-            <span class="ident">nrows</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">tuple</span>[<span class="number">1</span>].<span class="ident">parse</span>::<span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>(){
-                <span class="prelude-val">Ok</span>(<span class="ident">v</span>)=&gt;<span class="prelude-val">Some</span>(<span class="ident">v</span>),
-                <span class="prelude-val">Err</span>(<span class="kw">_</span>)=&gt;{<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="macro">format!</span>(<span class="string">&quot;Expecting NROWS line to be in the format &#39;NROWS=number&#39;, but did not find a number... found &#39;{}&#39;&quot;</span>, <span class="ident">tuple</span>[<span class="number">1</span>]));}
-            };            
-            <span class="kw">continue</span>;
-        }
-        <span class="kw">if</span> <span class="ident">line</span>.<span class="ident">starts_with</span>(<span class="string">&quot;NCOLS&quot;</span>){
-            <span class="kw">let</span> <span class="ident">tuple</span> : <span class="ident">Vec</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">str</span><span class="op">&gt;</span><span class="op">=</span> <span class="ident">line</span>.<span class="ident">split</span>(<span class="string">&#39;=&#39;</span>).<span class="ident">collect</span>();
-            <span class="kw">if</span> <span class="ident">tuple</span>.<span class="ident">len</span>() <span class="op">!</span><span class="op">=</span> <span class="number">2</span> {
-                <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="macro">format!</span>(<span class="string">&quot;Expecting NCOLS line to be in the format &#39;NCOLS=number&#39;... found &#39;{}&#39;&quot;</span>, <span class="ident">line</span>));
-            }
-            <span class="ident">ncols</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">tuple</span>[<span class="number">1</span>].<span class="ident">parse</span>::<span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>(){
-                <span class="prelude-val">Ok</span>(<span class="ident">v</span>)=&gt;<span class="prelude-val">Some</span>(<span class="ident">v</span>),
-                <span class="prelude-val">Err</span>(<span class="kw">_</span>)=&gt;{<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="macro">format!</span>(<span class="string">&quot;Expecting NCOLS line to be in the format &#39;NCOLS=number&#39;, but did not find a number... found &#39;{}&#39;&quot;</span>, <span class="ident">tuple</span>[<span class="number">1</span>]));}
-            };
-            <span class="kw">continue</span>;
-        }
-        <span class="kw">if</span> <span class="ident">line</span>.<span class="ident">starts_with</span>(<span class="string">&quot;NCOMP&quot;</span>){
-            <span class="kw">let</span> <span class="ident">tuple</span> : <span class="ident">Vec</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">str</span><span class="op">&gt;</span><span class="op">=</span> <span class="ident">line</span>.<span class="ident">split</span>(<span class="string">&#39;=&#39;</span>).<span class="ident">collect</span>();
-            <span class="kw">if</span> <span class="ident">tuple</span>.<span class="ident">len</span>() <span class="op">!</span><span class="op">=</span> <span class="number">2</span> {
-                <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="macro">format!</span>(<span class="string">&quot;Expecting NCOMP line to be in the format &#39;NCOMP=number&#39;... found &#39;{}&#39;&quot;</span>, <span class="ident">line</span>));
-            }
-            <span class="kw">let</span> <span class="ident">ncomp</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">tuple</span>[<span class="number">1</span>].<span class="ident">parse</span>::<span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>(){
-                <span class="prelude-val">Ok</span>(<span class="ident">fvalue</span>)=&gt;<span class="ident">fvalue</span>,
-                <span class="prelude-val">Err</span>(<span class="kw">_</span>)=&gt;{<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="macro">format!</span>(<span class="string">&quot;Expecting NCOMP line to be in the format &#39;NCOMP=number&#39;, but did not find a number... found &#39;{}&#39;&quot;</span>, <span class="ident">tuple</span>[<span class="number">1</span>]));}
-            };
-            <span class="kw">if</span> <span class="ident">ncomp</span> <span class="op">!</span><span class="op">=</span> <span class="number">3</span> {
-                <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="macro">format!</span>(<span class="string">&quot;Expecting 3 components in Colour Matrix... found {}&quot;</span>, <span class="ident">ncomp</span>))
-            }
-            <span class="kw">continue</span>;
-        }
-                
-    }
-
-    <span class="comment">// Check that the header info was fine</span>
-    <span class="kw">if</span> <span class="ident">nrows</span>.<span class="ident">is_none</span>(){
-        <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="macro">format!</span>(<span class="string">&quot;Matrix in file &#39;{}&#39; does not include number of rows in header&quot;</span>, <span class="ident">filename</span>));
-    }
-    <span class="kw">if</span> <span class="ident">ncols</span>.<span class="ident">is_none</span>(){
-        <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="macro">format!</span>(<span class="string">&quot;Matrix in file &#39;{}&#39; does not include number of columns in header&quot;</span>, <span class="ident">filename</span>));
-    }
-    <span class="kw">let</span> <span class="ident">nrows</span> <span class="op">=</span> <span class="ident">nrows</span>.<span class="ident">unwrap</span>();
-    <span class="kw">let</span> <span class="ident">ncols</span> <span class="op">=</span> <span class="ident">ncols</span>.<span class="ident">unwrap</span>();
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">matrix</span> <span class="op">=</span> <span class="ident">Matrix::new</span>(<span class="number">0.0</span>, <span class="ident">nrows</span>, <span class="ident">ncols</span>);
-
-    <span class="comment">// Now go on.</span>
-    
-    <span class="kw">for</span> (<span class="ident">nrow</span>,<span class="ident">line</span>) <span class="kw">in</span> <span class="ident">content</span>.<span class="ident">lines</span>().<span class="ident">skip</span>(<span class="ident">header_lines</span>).<span class="ident">enumerate</span>(){
-        <span class="kw">let</span> <span class="ident">ln</span> <span class="op">=</span> <span class="ident">nrow</span> <span class="op">+</span> <span class="ident">header_lines</span>;
-        <span class="kw">let</span> <span class="ident">values</span> : <span class="ident">Vec</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">str</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">line</span>.<span class="ident">split_ascii_whitespace</span>().<span class="ident">collect</span>();
-        <span class="kw">if</span> <span class="ident">values</span>.<span class="ident">len</span>() <span class="op">!</span><span class="op">=</span> <span class="number">3</span><span class="kw-2">*</span><span class="ident">ncols</span> {
-            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="macro">format!</span>(<span class="string">&quot;Expecting {} values in line {}... found {}&quot;</span>, <span class="number">3</span><span class="kw-2">*</span><span class="ident">ncols</span>, <span class="ident">ln</span>, <span class="ident">values</span>.<span class="ident">len</span>()));
-        }
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">ncol</span> <span class="op">=</span> <span class="number">0</span>;
-        <span class="kw">while</span> <span class="ident">ncol</span> <span class="op">&lt;</span> <span class="ident">ncols</span>{
-            <span class="kw">let</span> <span class="ident">r</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">values</span>[<span class="number">3</span><span class="kw-2">*</span><span class="ident">ncol</span>].<span class="ident">parse</span>::<span class="op">&lt;</span><span class="ident">Float</span><span class="op">&gt;</span>(){
-                <span class="prelude-val">Ok</span>(<span class="ident">fvalue</span>)=&gt;<span class="ident">fvalue</span>,
-                <span class="prelude-val">Err</span>(<span class="kw">_</span>)=&gt;{<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="macro">format!</span>(<span class="string">&quot;Incorrectly formated line {} in matrix in file &#39;{}&#39;&quot;</span>, <span class="ident">ln</span>, <span class="ident">filename</span>));}
-            };
-            <span class="kw">let</span> <span class="ident">g</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">values</span>[<span class="number">3</span><span class="kw-2">*</span><span class="ident">ncol</span><span class="op">+</span><span class="number">1</span>].<span class="ident">parse</span>::<span class="op">&lt;</span><span class="ident">Float</span><span class="op">&gt;</span>(){
-                <span class="prelude-val">Ok</span>(<span class="ident">fvalue</span>)=&gt;<span class="ident">fvalue</span>,
-                <span class="prelude-val">Err</span>(<span class="kw">_</span>)=&gt;{<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="macro">format!</span>(<span class="string">&quot;Incorrectly formated line {} in matrix in file &#39;{}&#39;&quot;</span>, <span class="ident">ln</span>, <span class="ident">filename</span>));}
-            };
-            <span class="kw">let</span> <span class="ident">b</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">values</span>[<span class="number">3</span><span class="kw-2">*</span><span class="ident">ncol</span><span class="op">+</span><span class="number">2</span>].<span class="ident">parse</span>::<span class="op">&lt;</span><span class="ident">Float</span><span class="op">&gt;</span>(){
-                <span class="prelude-val">Ok</span>(<span class="ident">fvalue</span>)=&gt;<span class="ident">fvalue</span>,
-                <span class="prelude-val">Err</span>(<span class="kw">_</span>)=&gt;{<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="macro">format!</span>(<span class="string">&quot;Incorrectly formated line {} in matrix in file &#39;{}&#39;&quot;</span>, <span class="ident">ln</span>, <span class="ident">filename</span>));}
-            };
-
-            <span class="ident">matrix</span>.<span class="ident">set</span>(<span class="ident">nrow</span>,<span class="ident">ncol</span>, <span class="number">0.265</span><span class="kw-2">*</span><span class="ident">r</span><span class="op">+</span><span class="number">0.67</span><span class="kw-2">*</span><span class="ident">g</span><span class="op">+</span><span class="number">0.065</span><span class="kw-2">*</span><span class="ident">b</span>).<span class="ident">unwrap</span>();
-
-            <span class="ident">ncol</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
-        }
-    }
-
-    <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">matrix</span>)
-
-}
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
 <span class="kw">mod</span> <span class="ident">tests</span> {
 
     <span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
+
+    <span class="kw">fn</span> <span class="ident">read_colour_matrix</span>(<span class="ident">filename</span>: <span class="ident">String</span>)-&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Matrix</span>, <span class="ident">String</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">content</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">std::fs::read_to_string</span>(<span class="ident">filename</span>.<span class="ident">clone</span>()){
+            <span class="prelude-val">Ok</span>(<span class="ident">v</span>)=&gt;<span class="ident">v</span>,
+            <span class="prelude-val">Err</span>(<span class="kw">_</span>)=&gt;{
+                <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="macro">format!</span>(<span class="string">&quot;Could not read Matrix file &#39;{}&#39;&quot;</span>, <span class="ident">filename</span>))
+            }
+        };
+        
+        <span class="comment">// Read header</span>
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">nrows</span> : <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> <span class="op">=</span> <span class="prelude-val">None</span>;
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">ncols</span> : <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> <span class="op">=</span> <span class="prelude-val">None</span>;
+        <span class="comment">// let mut ncomp : Option&lt;usize&gt; = None;</span>
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">header_lines</span> <span class="op">=</span> <span class="number">0</span>;
+        <span class="kw">for</span> <span class="ident">line</span> <span class="kw">in</span> <span class="ident">content</span>.<span class="ident">lines</span>(){
+            <span class="ident">header_lines</span> <span class="op">+</span><span class="op">=</span><span class="number">1</span>;
+            <span class="comment">// If we reach a blank line, we are over with the header.</span>
+            <span class="kw">if</span> <span class="ident">line</span>.<span class="ident">len</span>() <span class="op">==</span> <span class="number">0</span> <span class="op">|</span><span class="op">|</span> <span class="ident">line</span>.<span class="ident">as_bytes</span>()[<span class="number">0</span>].<span class="ident">is_ascii_whitespace</span>(){
+                <span class="kw">break</span>;
+            }
+    
+            <span class="kw">if</span> <span class="ident">line</span>.<span class="ident">starts_with</span>(<span class="string">&quot;NROWS&quot;</span>){
+                <span class="kw">let</span> <span class="ident">tuple</span> : <span class="ident">Vec</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">str</span><span class="op">&gt;</span><span class="op">=</span> <span class="ident">line</span>.<span class="ident">split</span>(<span class="string">&#39;=&#39;</span>).<span class="ident">collect</span>();
+                <span class="kw">if</span> <span class="ident">tuple</span>.<span class="ident">len</span>() <span class="op">!</span><span class="op">=</span> <span class="number">2</span> {
+                    <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="macro">format!</span>(<span class="string">&quot;Expecting NROWS line to be in the format &#39;NROWS=number&#39;... found &#39;{}&#39;&quot;</span>, <span class="ident">line</span>));
+                }
+                <span class="ident">nrows</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">tuple</span>[<span class="number">1</span>].<span class="ident">parse</span>::<span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>(){
+                    <span class="prelude-val">Ok</span>(<span class="ident">v</span>)=&gt;<span class="prelude-val">Some</span>(<span class="ident">v</span>),
+                    <span class="prelude-val">Err</span>(<span class="kw">_</span>)=&gt;{<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="macro">format!</span>(<span class="string">&quot;Expecting NROWS line to be in the format &#39;NROWS=number&#39;, but did not find a number... found &#39;{}&#39;&quot;</span>, <span class="ident">tuple</span>[<span class="number">1</span>]));}
+                };            
+                <span class="kw">continue</span>;
+            }
+            <span class="kw">if</span> <span class="ident">line</span>.<span class="ident">starts_with</span>(<span class="string">&quot;NCOLS&quot;</span>){
+                <span class="kw">let</span> <span class="ident">tuple</span> : <span class="ident">Vec</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">str</span><span class="op">&gt;</span><span class="op">=</span> <span class="ident">line</span>.<span class="ident">split</span>(<span class="string">&#39;=&#39;</span>).<span class="ident">collect</span>();
+                <span class="kw">if</span> <span class="ident">tuple</span>.<span class="ident">len</span>() <span class="op">!</span><span class="op">=</span> <span class="number">2</span> {
+                    <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="macro">format!</span>(<span class="string">&quot;Expecting NCOLS line to be in the format &#39;NCOLS=number&#39;... found &#39;{}&#39;&quot;</span>, <span class="ident">line</span>));
+                }
+                <span class="ident">ncols</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">tuple</span>[<span class="number">1</span>].<span class="ident">parse</span>::<span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>(){
+                    <span class="prelude-val">Ok</span>(<span class="ident">v</span>)=&gt;<span class="prelude-val">Some</span>(<span class="ident">v</span>),
+                    <span class="prelude-val">Err</span>(<span class="kw">_</span>)=&gt;{<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="macro">format!</span>(<span class="string">&quot;Expecting NCOLS line to be in the format &#39;NCOLS=number&#39;, but did not find a number... found &#39;{}&#39;&quot;</span>, <span class="ident">tuple</span>[<span class="number">1</span>]));}
+                };
+                <span class="kw">continue</span>;
+            }
+            <span class="kw">if</span> <span class="ident">line</span>.<span class="ident">starts_with</span>(<span class="string">&quot;NCOMP&quot;</span>){
+                <span class="kw">let</span> <span class="ident">tuple</span> : <span class="ident">Vec</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">str</span><span class="op">&gt;</span><span class="op">=</span> <span class="ident">line</span>.<span class="ident">split</span>(<span class="string">&#39;=&#39;</span>).<span class="ident">collect</span>();
+                <span class="kw">if</span> <span class="ident">tuple</span>.<span class="ident">len</span>() <span class="op">!</span><span class="op">=</span> <span class="number">2</span> {
+                    <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="macro">format!</span>(<span class="string">&quot;Expecting NCOMP line to be in the format &#39;NCOMP=number&#39;... found &#39;{}&#39;&quot;</span>, <span class="ident">line</span>));
+                }
+                <span class="kw">let</span> <span class="ident">ncomp</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">tuple</span>[<span class="number">1</span>].<span class="ident">parse</span>::<span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>(){
+                    <span class="prelude-val">Ok</span>(<span class="ident">fvalue</span>)=&gt;<span class="ident">fvalue</span>,
+                    <span class="prelude-val">Err</span>(<span class="kw">_</span>)=&gt;{<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="macro">format!</span>(<span class="string">&quot;Expecting NCOMP line to be in the format &#39;NCOMP=number&#39;, but did not find a number... found &#39;{}&#39;&quot;</span>, <span class="ident">tuple</span>[<span class="number">1</span>]));}
+                };
+                <span class="kw">if</span> <span class="ident">ncomp</span> <span class="op">!</span><span class="op">=</span> <span class="number">3</span> {
+                    <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="macro">format!</span>(<span class="string">&quot;Expecting 3 components in Colour Matrix... found {}&quot;</span>, <span class="ident">ncomp</span>))
+                }
+                <span class="kw">continue</span>;
+            }
+                    
+        }
+    
+        <span class="comment">// Check that the header info was fine</span>
+        <span class="kw">if</span> <span class="ident">nrows</span>.<span class="ident">is_none</span>(){
+            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="macro">format!</span>(<span class="string">&quot;Matrix in file &#39;{}&#39; does not include number of rows in header&quot;</span>, <span class="ident">filename</span>));
+        }
+        <span class="kw">if</span> <span class="ident">ncols</span>.<span class="ident">is_none</span>(){
+            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="macro">format!</span>(<span class="string">&quot;Matrix in file &#39;{}&#39; does not include number of columns in header&quot;</span>, <span class="ident">filename</span>));
+        }
+        <span class="kw">let</span> <span class="ident">nrows</span> <span class="op">=</span> <span class="ident">nrows</span>.<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="ident">ncols</span> <span class="op">=</span> <span class="ident">ncols</span>.<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">matrix</span> <span class="op">=</span> <span class="ident">Matrix::new</span>(<span class="number">0.0</span>, <span class="ident">nrows</span>, <span class="ident">ncols</span>);
+    
+        <span class="comment">// Now go on.</span>
+        
+        <span class="kw">for</span> (<span class="ident">nrow</span>,<span class="ident">line</span>) <span class="kw">in</span> <span class="ident">content</span>.<span class="ident">lines</span>().<span class="ident">skip</span>(<span class="ident">header_lines</span>).<span class="ident">enumerate</span>(){
+            <span class="kw">let</span> <span class="ident">ln</span> <span class="op">=</span> <span class="ident">nrow</span> <span class="op">+</span> <span class="ident">header_lines</span>;
+            <span class="kw">let</span> <span class="ident">values</span> : <span class="ident">Vec</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">str</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">line</span>.<span class="ident">split_ascii_whitespace</span>().<span class="ident">collect</span>();
+            <span class="kw">if</span> <span class="ident">values</span>.<span class="ident">len</span>() <span class="op">!</span><span class="op">=</span> <span class="number">3</span><span class="kw-2">*</span><span class="ident">ncols</span> {
+                <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="macro">format!</span>(<span class="string">&quot;Expecting {} values in line {}... found {}&quot;</span>, <span class="number">3</span><span class="kw-2">*</span><span class="ident">ncols</span>, <span class="ident">ln</span>, <span class="ident">values</span>.<span class="ident">len</span>()));
+            }
+            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">ncol</span> <span class="op">=</span> <span class="number">0</span>;
+            <span class="kw">while</span> <span class="ident">ncol</span> <span class="op">&lt;</span> <span class="ident">ncols</span>{
+                <span class="kw">let</span> <span class="ident">r</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">values</span>[<span class="number">3</span><span class="kw-2">*</span><span class="ident">ncol</span>].<span class="ident">parse</span>::<span class="op">&lt;</span><span class="ident">Float</span><span class="op">&gt;</span>(){
+                    <span class="prelude-val">Ok</span>(<span class="ident">fvalue</span>)=&gt;<span class="ident">fvalue</span>,
+                    <span class="prelude-val">Err</span>(<span class="kw">_</span>)=&gt;{<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="macro">format!</span>(<span class="string">&quot;Incorrectly formated line {} in matrix in file &#39;{}&#39;&quot;</span>, <span class="ident">ln</span>, <span class="ident">filename</span>));}
+                };
+                <span class="kw">let</span> <span class="ident">g</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">values</span>[<span class="number">3</span><span class="kw-2">*</span><span class="ident">ncol</span><span class="op">+</span><span class="number">1</span>].<span class="ident">parse</span>::<span class="op">&lt;</span><span class="ident">Float</span><span class="op">&gt;</span>(){
+                    <span class="prelude-val">Ok</span>(<span class="ident">fvalue</span>)=&gt;<span class="ident">fvalue</span>,
+                    <span class="prelude-val">Err</span>(<span class="kw">_</span>)=&gt;{<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="macro">format!</span>(<span class="string">&quot;Incorrectly formated line {} in matrix in file &#39;{}&#39;&quot;</span>, <span class="ident">ln</span>, <span class="ident">filename</span>));}
+                };
+                <span class="kw">let</span> <span class="ident">b</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">values</span>[<span class="number">3</span><span class="kw-2">*</span><span class="ident">ncol</span><span class="op">+</span><span class="number">2</span>].<span class="ident">parse</span>::<span class="op">&lt;</span><span class="ident">Float</span><span class="op">&gt;</span>(){
+                    <span class="prelude-val">Ok</span>(<span class="ident">fvalue</span>)=&gt;<span class="ident">fvalue</span>,
+                    <span class="prelude-val">Err</span>(<span class="kw">_</span>)=&gt;{<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="macro">format!</span>(<span class="string">&quot;Incorrectly formated line {} in matrix in file &#39;{}&#39;&quot;</span>, <span class="ident">ln</span>, <span class="ident">filename</span>));}
+                };
+    
+                <span class="ident">matrix</span>.<span class="ident">set</span>(<span class="ident">nrow</span>,<span class="ident">ncol</span>, <span class="number">0.265</span><span class="kw-2">*</span><span class="ident">r</span><span class="op">+</span><span class="number">0.67</span><span class="kw-2">*</span><span class="ident">g</span><span class="op">+</span><span class="number">0.065</span><span class="kw-2">*</span><span class="ident">b</span>).<span class="ident">unwrap</span>();
+    
+                <span class="ident">ncol</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
+            }
+        }
+    
+        <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">matrix</span>)
+    
+    }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_read_colour_matrix</span>(){
@@ -3674,5 +3697,5 @@ SOFTWARE.
     }
 }
 </code></pre></div>
-</section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="solar" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>
+</section><section id="search" class="content hidden"></section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="solar" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.59.0 (9d1b2106e 2022-02-23)" ></div>
 </body></html>
