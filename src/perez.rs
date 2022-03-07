@@ -430,7 +430,16 @@ impl PerezSky {
         and then here... refactoring might help
         */
         let day = Time::Standard(date.day_of_year());
-        let sun_position = solar.sun_position(day).unwrap();
+        let sun_position = match solar.sun_position(day){
+            Some(pos)=>pos,
+            None =>{
+                for bin in 0..r.n_bins {                                
+                    vec.set(bin, 0, 0.0)?;
+                }
+                return Ok(())
+            }
+
+        };
         let day = solar.unwrap_solar_time(day);
         let cos_zenit = sun_position.z;
         let zenith = if cos_zenit <= 0. {
@@ -536,7 +545,7 @@ impl PerezSky {
             
             for k in (0..N_SUNS).rev(){
                 // What if Visible? or Solar? One of them is wrong.
-                let mut val_add = weights[k] * dir_illum / (WHTEFFICACY * tot_weight);
+                let mut val_add = weights[k] * dir_illum / (WHTEFFICACY * tot_weight );
 
                 // Divide by solid angle... of patch or sharp sun.
                 /* 
@@ -559,113 +568,115 @@ impl PerezSky {
 }
 
 
-fn read_colour_matrix(filename: String)-> Result<Matrix, String> {
-    let content = match std::fs::read_to_string(filename.clone()){
-        Ok(v)=>v,
-        Err(_)=>{
-            return Err(format!("Could not read Matrix file '{}'", filename))
-        }
-    };
-    
-    // Read header
-    let mut nrows : Option<usize> = None;
-    let mut ncols : Option<usize> = None;
-    // let mut ncomp : Option<usize> = None;
-    let mut header_lines = 0;
-    for line in content.lines(){
-        header_lines +=1;
-        // If we reach a blank line, we are over with the header.
-        if line.len() == 0 || line.as_bytes()[0].is_ascii_whitespace(){
-            break;
-        }
 
-        if line.starts_with("NROWS"){
-            let tuple : Vec<&str>= line.split('=').collect();
-            if tuple.len() != 2 {
-                return Err(format!("Expecting NROWS line to be in the format 'NROWS=number'... found '{}'", line));
-            }
-            nrows = match tuple[1].parse::<usize>(){
-                Ok(v)=>Some(v),
-                Err(_)=>{return Err(format!("Expecting NROWS line to be in the format 'NROWS=number', but did not find a number... found '{}'", tuple[1]));}
-            };            
-            continue;
-        }
-        if line.starts_with("NCOLS"){
-            let tuple : Vec<&str>= line.split('=').collect();
-            if tuple.len() != 2 {
-                return Err(format!("Expecting NCOLS line to be in the format 'NCOLS=number'... found '{}'", line));
-            }
-            ncols = match tuple[1].parse::<usize>(){
-                Ok(v)=>Some(v),
-                Err(_)=>{return Err(format!("Expecting NCOLS line to be in the format 'NCOLS=number', but did not find a number... found '{}'", tuple[1]));}
-            };
-            continue;
-        }
-        if line.starts_with("NCOMP"){
-            let tuple : Vec<&str>= line.split('=').collect();
-            if tuple.len() != 2 {
-                return Err(format!("Expecting NCOMP line to be in the format 'NCOMP=number'... found '{}'", line));
-            }
-            let ncomp = match tuple[1].parse::<usize>(){
-                Ok(fvalue)=>fvalue,
-                Err(_)=>{return Err(format!("Expecting NCOMP line to be in the format 'NCOMP=number', but did not find a number... found '{}'", tuple[1]));}
-            };
-            if ncomp != 3 {
-                return Err(format!("Expecting 3 components in Colour Matrix... found {}", ncomp))
-            }
-            continue;
-        }
-                
-    }
-
-    // Check that the header info was fine
-    if nrows.is_none(){
-        return Err(format!("Matrix in file '{}' does not include number of rows in header", filename));
-    }
-    if ncols.is_none(){
-        return Err(format!("Matrix in file '{}' does not include number of columns in header", filename));
-    }
-    let nrows = nrows.unwrap();
-    let ncols = ncols.unwrap();
-    let mut matrix = Matrix::new(0.0, nrows, ncols);
-
-    // Now go on.
-    
-    for (nrow,line) in content.lines().skip(header_lines).enumerate(){
-        let ln = nrow + header_lines;
-        let values : Vec<&str> = line.split_ascii_whitespace().collect();
-        if values.len() != 3*ncols {
-            return Err(format!("Expecting {} values in line {}... found {}", 3*ncols, ln, values.len()));
-        }
-        let mut ncol = 0;
-        while ncol < ncols{
-            let r = match values[3*ncol].parse::<Float>(){
-                Ok(fvalue)=>fvalue,
-                Err(_)=>{return Err(format!("Incorrectly formated line {} in matrix in file '{}'", ln, filename));}
-            };
-            let g = match values[3*ncol+1].parse::<Float>(){
-                Ok(fvalue)=>fvalue,
-                Err(_)=>{return Err(format!("Incorrectly formated line {} in matrix in file '{}'", ln, filename));}
-            };
-            let b = match values[3*ncol+2].parse::<Float>(){
-                Ok(fvalue)=>fvalue,
-                Err(_)=>{return Err(format!("Incorrectly formated line {} in matrix in file '{}'", ln, filename));}
-            };
-
-            matrix.set(nrow,ncol, 0.265*r+0.67*g+0.065*b).unwrap();
-
-            ncol += 1;
-        }
-    }
-
-    return Ok(matrix)
-
-}
 
 #[cfg(test)]
 mod tests {
 
     use super::*;
+
+    fn read_colour_matrix(filename: String)-> Result<Matrix, String> {
+        let content = match std::fs::read_to_string(filename.clone()){
+            Ok(v)=>v,
+            Err(_)=>{
+                return Err(format!("Could not read Matrix file '{}'", filename))
+            }
+        };
+        
+        // Read header
+        let mut nrows : Option<usize> = None;
+        let mut ncols : Option<usize> = None;
+        // let mut ncomp : Option<usize> = None;
+        let mut header_lines = 0;
+        for line in content.lines(){
+            header_lines +=1;
+            // If we reach a blank line, we are over with the header.
+            if line.len() == 0 || line.as_bytes()[0].is_ascii_whitespace(){
+                break;
+            }
+    
+            if line.starts_with("NROWS"){
+                let tuple : Vec<&str>= line.split('=').collect();
+                if tuple.len() != 2 {
+                    return Err(format!("Expecting NROWS line to be in the format 'NROWS=number'... found '{}'", line));
+                }
+                nrows = match tuple[1].parse::<usize>(){
+                    Ok(v)=>Some(v),
+                    Err(_)=>{return Err(format!("Expecting NROWS line to be in the format 'NROWS=number', but did not find a number... found '{}'", tuple[1]));}
+                };            
+                continue;
+            }
+            if line.starts_with("NCOLS"){
+                let tuple : Vec<&str>= line.split('=').collect();
+                if tuple.len() != 2 {
+                    return Err(format!("Expecting NCOLS line to be in the format 'NCOLS=number'... found '{}'", line));
+                }
+                ncols = match tuple[1].parse::<usize>(){
+                    Ok(v)=>Some(v),
+                    Err(_)=>{return Err(format!("Expecting NCOLS line to be in the format 'NCOLS=number', but did not find a number... found '{}'", tuple[1]));}
+                };
+                continue;
+            }
+            if line.starts_with("NCOMP"){
+                let tuple : Vec<&str>= line.split('=').collect();
+                if tuple.len() != 2 {
+                    return Err(format!("Expecting NCOMP line to be in the format 'NCOMP=number'... found '{}'", line));
+                }
+                let ncomp = match tuple[1].parse::<usize>(){
+                    Ok(fvalue)=>fvalue,
+                    Err(_)=>{return Err(format!("Expecting NCOMP line to be in the format 'NCOMP=number', but did not find a number... found '{}'", tuple[1]));}
+                };
+                if ncomp != 3 {
+                    return Err(format!("Expecting 3 components in Colour Matrix... found {}", ncomp))
+                }
+                continue;
+            }
+                    
+        }
+    
+        // Check that the header info was fine
+        if nrows.is_none(){
+            return Err(format!("Matrix in file '{}' does not include number of rows in header", filename));
+        }
+        if ncols.is_none(){
+            return Err(format!("Matrix in file '{}' does not include number of columns in header", filename));
+        }
+        let nrows = nrows.unwrap();
+        let ncols = ncols.unwrap();
+        let mut matrix = Matrix::new(0.0, nrows, ncols);
+    
+        // Now go on.
+        
+        for (nrow,line) in content.lines().skip(header_lines).enumerate(){
+            let ln = nrow + header_lines;
+            let values : Vec<&str> = line.split_ascii_whitespace().collect();
+            if values.len() != 3*ncols {
+                return Err(format!("Expecting {} values in line {}... found {}", 3*ncols, ln, values.len()));
+            }
+            let mut ncol = 0;
+            while ncol < ncols{
+                let r = match values[3*ncol].parse::<Float>(){
+                    Ok(fvalue)=>fvalue,
+                    Err(_)=>{return Err(format!("Incorrectly formated line {} in matrix in file '{}'", ln, filename));}
+                };
+                let g = match values[3*ncol+1].parse::<Float>(){
+                    Ok(fvalue)=>fvalue,
+                    Err(_)=>{return Err(format!("Incorrectly formated line {} in matrix in file '{}'", ln, filename));}
+                };
+                let b = match values[3*ncol+2].parse::<Float>(){
+                    Ok(fvalue)=>fvalue,
+                    Err(_)=>{return Err(format!("Incorrectly formated line {} in matrix in file '{}'", ln, filename));}
+                };
+    
+                matrix.set(nrow,ncol, 0.265*r+0.67*g+0.065*b).unwrap();
+    
+                ncol += 1;
+            }
+        }
+    
+        return Ok(matrix)
+    
+    }
 
     #[test]
     fn test_read_colour_matrix(){
