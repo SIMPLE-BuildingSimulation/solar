@@ -96,15 +96,19 @@ impl ReinhartSky {
     /// Calculates the number of total bins in a Reinhart's discretization
     /// including the ground
     pub fn n_bins(mf: usize) -> usize {
-        fn raccum(mf: usize, row: usize) -> usize {
-            if row == 0 {
-                0
-            } else {
-                bins_in_row(mf, row - 1) + raccum(mf, row - 1)
-            }
-        }
+        // 144 Tregenza divided in MF rows and cols; + Ground + Cap
+        144 * mf.pow(2) + 2
+        
+        // This below is what is written in Radiance's cal files, I think
+        // fn raccum(mf: usize, row: usize) -> usize {
+        //     if row == 0 {
+        //         0
+        //     } else {
+        //         bins_in_row(mf, row - 1) + raccum(mf, row - 1)
+        //     }
+        // }
 
-        raccum(mf, 7 * mf + 1) + 1
+        // raccum(mf, 7 * mf + 1) + 1
     }
 
     /// Calculates the row in which a certain bin is located

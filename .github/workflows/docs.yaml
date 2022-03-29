@@ -9,15 +9,17 @@ on:
 env:
   CARGO_TERM_COLOR: always
 
-jobs:         
-  docs:    
-    runs-on: ubuntu-latest    
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
     steps:
     - uses: actions/checkout@v1    
     - name: Build doc
       run: RUSTDOCFLAGS="--html-in-header katex.html" cargo doc --document-private-items --no-deps
     - name: Set Index
-      run: echo '<meta http-equiv=refresh content=0;url=solar/index.html>' > target/doc/index.html
+      run: echo '<meta http-equiv=refresh content=0;url=simple_model/index.html>' > target/doc/index.html
     - name: Deploy
       uses: JamesIves/github-pages-deploy-action@4.1.5
       with:
