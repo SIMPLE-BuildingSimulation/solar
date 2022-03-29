@@ -1,0 +1,17 @@
+coverage:
+  range: 90..100 
+  round: down
+  precision: 2
+  status:
+    project:
+      default:
+        threshold: 1%
+ignore:
+  - "derive" 
+  - "tests" 
+  - "src/tests"
+  - "benches" 
+# Make less noisy comments
+comment:
+  layout: "files"
+  require_changes: yes
