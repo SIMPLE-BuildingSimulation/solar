@@ -4037,6 +4037,10 @@
 <span id="4001">4001</span>
 <span id="4002">4002</span>
 <span id="4003">4003</span>
+<span id="4004">4004</span>
+<span id="4005">4005</span>
+<span id="4006">4006</span>
+<span id="4007">4007</span>
 </pre><pre class="rust"><code><span class="comment">/*
 MIT License
 Copyright (c) 2021 Germán Molina
@@ -4135,15 +4139,19 @@ SOFTWARE.
     <span class="doccomment">/// Calculates the number of total bins in a Reinhart&#39;s discretization</span>
     <span class="doccomment">/// including the ground</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">n_bins</span>(<span class="ident">mf</span>: <span class="ident">usize</span>) -&gt; <span class="ident">usize</span> {
-        <span class="kw">fn</span> <span class="ident">raccum</span>(<span class="ident">mf</span>: <span class="ident">usize</span>, <span class="ident">row</span>: <span class="ident">usize</span>) -&gt; <span class="ident">usize</span> {
-            <span class="kw">if</span> <span class="ident">row</span> <span class="op">==</span> <span class="number">0</span> {
-                <span class="number">0</span>
-            } <span class="kw">else</span> {
-                <span class="ident">bins_in_row</span>(<span class="ident">mf</span>, <span class="ident">row</span> <span class="op">-</span> <span class="number">1</span>) <span class="op">+</span> <span class="ident">raccum</span>(<span class="ident">mf</span>, <span class="ident">row</span> <span class="op">-</span> <span class="number">1</span>)
-            }
-        }
+        <span class="comment">// 144 Tregenza divided in MF rows and cols; + Ground + Cap</span>
+        <span class="number">144</span> <span class="op">*</span> <span class="ident">mf</span>.<span class="ident">pow</span>(<span class="number">2</span>) <span class="op">+</span> <span class="number">2</span>
+        
+        <span class="comment">// This below is what is written in Radiance&#39;s cal files, I think</span>
+        <span class="comment">// fn raccum(mf: usize, row: usize) -&gt; usize {</span>
+        <span class="comment">//     if row == 0 {</span>
+        <span class="comment">//         0</span>
+        <span class="comment">//     } else {</span>
+        <span class="comment">//         bins_in_row(mf, row - 1) + raccum(mf, row - 1)</span>
+        <span class="comment">//     }</span>
+        <span class="comment">// }</span>
 
-        <span class="ident">raccum</span>(<span class="ident">mf</span>, <span class="number">7</span> <span class="op">*</span> <span class="ident">mf</span> <span class="op">+</span> <span class="number">1</span>) <span class="op">+</span> <span class="number">1</span>
+        <span class="comment">// raccum(mf, 7 * mf + 1) + 1</span>
     }
 
     <span class="doccomment">/// Calculates the row in which a certain bin is located</span>
