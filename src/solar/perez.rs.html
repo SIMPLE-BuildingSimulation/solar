@@ -1912,7 +1912,7 @@ SOFTWARE.
 
 <span class="kw">impl</span> <span class="ident">PerezSky</span> {
     <span class="doccomment">/// Equation 1</span>
-    <span class="kw">fn</span> <span class="ident">sky_clearness</span>(
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">sky_clearness</span>(
         <span class="ident">diffuse_horizontal_irrad</span>: <span class="ident">Float</span>,
         <span class="ident">direct_normal_irrad</span>: <span class="ident">Float</span>,
         <span class="ident">solar_zenith</span>: <span class="ident">Float</span>,
@@ -1924,7 +1924,7 @@ SOFTWARE.
     }
 
     <span class="doccomment">/// Equation 2</span>
-    <span class="kw">fn</span> <span class="ident">sky_brightness</span>(
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">sky_brightness</span>(
         <span class="ident">diffuse_horizontal_irrad</span>: <span class="ident">Float</span>,
         <span class="ident">air_mass</span>: <span class="ident">Float</span>,
         <span class="ident">extraterrestrial_irradiance</span>: <span class="ident">Float</span>,
@@ -1933,12 +1933,12 @@ SOFTWARE.
     }
 
     <span class="doccomment">/// Equation 3... dew_point_temp in C</span>
-    <span class="kw">fn</span> <span class="ident">precipitable_water_content</span>(<span class="ident">dew_point_temp</span>: <span class="ident">Float</span>) -&gt; <span class="ident">Float</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">precipitable_water_content</span>(<span class="ident">dew_point_temp</span>: <span class="ident">Float</span>) -&gt; <span class="ident">Float</span> {
         (<span class="number">0.07</span> <span class="op">*</span> <span class="ident">dew_point_temp</span> <span class="op">-</span> <span class="number">0.075</span>).<span class="ident">exp</span>()
     }
 
     <span class="doccomment">/// Get the sky clearness category (Table 1 in the 1990 paper)</span>
-    <span class="kw">fn</span> <span class="ident">clearness_category</span>(<span class="ident">clearness_index</span>: <span class="ident">Float</span>) -&gt; <span class="ident">usize</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">clearness_category</span>(<span class="ident">clearness_index</span>: <span class="ident">Float</span>) -&gt; <span class="ident">usize</span> {
         <span class="kw">if</span> <span class="ident">clearness_index</span> <span class="op">&lt;</span> <span class="number">1.</span> {
             <span class="macro">panic!</span>(
                 <span class="string">&quot;A clearness index of {} is too low for Perez&#39;s Sky&quot;</span>,
@@ -1970,7 +1970,7 @@ SOFTWARE.
 
     <span class="comment">// /// Calculates the direct illuminance/diffuse radiance ratio</span>
     <span class="comment">// /// according to Equation 8 and Table 4 of Perez et al. 1990</span>
-    <span class="kw">fn</span> <span class="ident">direct_illuminance_ratio</span>(<span class="ident">p_water_content</span>: <span class="ident">Float</span>, <span class="ident">zenit</span>: <span class="ident">Float</span>, <span class="ident">sky_brightness</span>: <span class="ident">Float</span>, <span class="ident">index</span>: <span class="ident">usize</span>)-&gt;<span class="ident">Float</span>{
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">direct_illuminance_ratio</span>(<span class="ident">p_water_content</span>: <span class="ident">Float</span>, <span class="ident">zenit</span>: <span class="ident">Float</span>, <span class="ident">sky_brightness</span>: <span class="ident">Float</span>, <span class="ident">index</span>: <span class="ident">usize</span>)-&gt;<span class="ident">Float</span>{
         <span class="kw">if</span> <span class="ident">index</span> <span class="op">&gt;</span> <span class="number">7</span> {
             <span class="macro">panic!</span>(<span class="string">&quot;Table 4 of Perez&#39;s paper has only 8 sky clearness categories (starting from 0)... received {}&quot;</span>, <span class="ident">index</span>)
         }
@@ -1997,7 +1997,7 @@ SOFTWARE.
 
     <span class="doccomment">/// Calculates the diffuse illuminance/diffuse radiance ratio</span>
     <span class="doccomment">/// according to Equation 7 and Table 4 of Perez et al. 1990</span>
-    <span class="kw">fn</span> <span class="ident">diffuse_illuminance_ratio</span>(
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">diffuse_illuminance_ratio</span>(
         <span class="ident">p_water_content</span>: <span class="ident">Float</span>,
         <span class="ident">cos_zenit</span>: <span class="ident">Float</span>,
         <span class="ident">sky_brightness</span>: <span class="ident">Float</span>,
@@ -2026,7 +2026,7 @@ SOFTWARE.
     }
 
     <span class="doccomment">/// Calculates the Perez sky params</span>
-    <span class="kw">fn</span> <span class="ident">calc_params</span>(<span class="ident">zenith</span>: <span class="ident">Float</span>, <span class="ident">epsilon</span>: <span class="ident">Float</span>, <span class="kw-2">mut</span> <span class="ident">delta</span>: <span class="ident">Float</span>) -&gt; [<span class="ident">Float</span>; <span class="number">5</span>] {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">calc_params</span>(<span class="ident">zenith</span>: <span class="ident">Float</span>, <span class="ident">epsilon</span>: <span class="ident">Float</span>, <span class="kw-2">mut</span> <span class="ident">delta</span>: <span class="ident">Float</span>) -&gt; [<span class="ident">Float</span>; <span class="number">5</span>] {
         <span class="kw">const</span> <span class="ident">TABLE</span>: [[<span class="ident">Float</span>; <span class="number">20</span>]; <span class="number">8</span>] <span class="op">=</span> [
             <span class="comment">/* Sky clearness (epsilon): 1.000 to 1.065 */</span>
             [
