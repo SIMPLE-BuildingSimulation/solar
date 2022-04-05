@@ -45,7 +45,7 @@ pub struct PerezSky {}
 
 impl PerezSky {
     /// Equation 1
-    fn sky_clearness(
+    pub fn sky_clearness(
         diffuse_horizontal_irrad: Float,
         direct_normal_irrad: Float,
         solar_zenith: Float,
@@ -57,7 +57,7 @@ impl PerezSky {
     }
 
     /// Equation 2
-    fn sky_brightness(
+    pub fn sky_brightness(
         diffuse_horizontal_irrad: Float,
         air_mass: Float,
         extraterrestrial_irradiance: Float,
@@ -66,12 +66,12 @@ impl PerezSky {
     }
 
     /// Equation 3... dew_point_temp in C
-    fn precipitable_water_content(dew_point_temp: Float) -> Float {
+    pub fn precipitable_water_content(dew_point_temp: Float) -> Float {
         (0.07 * dew_point_temp - 0.075).exp()
     }
 
     /// Get the sky clearness category (Table 1 in the 1990 paper)
-    fn clearness_category(clearness_index: Float) -> usize {
+    pub fn clearness_category(clearness_index: Float) -> usize {
         if clearness_index < 1. {
             panic!(
                 "A clearness index of {} is too low for Perez's Sky",
@@ -103,7 +103,7 @@ impl PerezSky {
 
     // /// Calculates the direct illuminance/diffuse radiance ratio
     // /// according to Equation 8 and Table 4 of Perez et al. 1990
-    fn direct_illuminance_ratio(p_water_content: Float, zenit: Float, sky_brightness: Float, index: usize)->Float{
+    pub fn direct_illuminance_ratio(p_water_content: Float, zenit: Float, sky_brightness: Float, index: usize)->Float{
         if index > 7 {
             panic!("Table 4 of Perez's paper has only 8 sky clearness categories (starting from 0)... received {}", index)
         }
@@ -130,7 +130,7 @@ impl PerezSky {
 
     /// Calculates the diffuse illuminance/diffuse radiance ratio
     /// according to Equation 7 and Table 4 of Perez et al. 1990
-    fn diffuse_illuminance_ratio(
+    pub fn diffuse_illuminance_ratio(
         p_water_content: Float,
         cos_zenit: Float,
         sky_brightness: Float,
@@ -159,7 +159,7 @@ impl PerezSky {
     }
 
     /// Calculates the Perez sky params
-    fn calc_params(zenith: Float, epsilon: Float, mut delta: Float) -> [Float; 5] {
+    pub fn calc_params(zenith: Float, epsilon: Float, mut delta: Float) -> [Float; 5] {
         const TABLE: [[Float; 20]; 8] = [
             /* Sky clearness (epsilon): 1.000 to 1.065 */
             [
