@@ -9,8 +9,8 @@ edition = "2018"
 [dependencies]
 geometry3d = { git = "https://github.com/SIMPLE-BuildingSimulation/geometry3d.git" }
 # geometry3d = {path="../geometry3d"}
-# calendar = { git = "https://github.com/SIMPLE-BuildingSimulation/calendar.git" }
-calendar = {path="../calendar"}
+calendar = { git = "https://github.com/SIMPLE-BuildingSimulation/calendar.git" }
+# calendar = {path="../calendar"}
 matrix = { git = "https://github.com/SIMPLE-BuildingSimulation/matrix.git" }
 weather = {git = "https://github.com/SIMPLE-BuildingSimulation/weather.git" }
 
