@@ -2129,7 +2129,7 @@ SOFTWARE.
         <span class="ident">dew_point</span>: <span class="ident">Float</span>,
         <span class="ident">diffuse_horizontal_irrad</span>: <span class="ident">Float</span>,
         <span class="ident">direct_normal_irrad</span>: <span class="ident">Float</span>        
-    ) -&gt; <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Fn</span>(<span class="ident">Vector3D</span>) -&gt; <span class="ident">Float</span><span class="op">&gt;</span> {        
+    ) -&gt; <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Fn</span>(<span class="ident">Vector3D</span>) -&gt; <span class="ident">Float</span> <span class="op">+</span> <span class="ident">Sync</span><span class="op">&gt;</span> {        
 
         <span class="comment">// Convert local into solar time</span>
         <span class="kw">let</span> <span class="ident">day</span> <span class="op">=</span> <span class="ident">Time::Standard</span>(<span class="ident">date</span>.<span class="ident">day_of_year</span>());
