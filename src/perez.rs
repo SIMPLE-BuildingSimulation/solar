@@ -262,7 +262,7 @@ impl PerezSky {
         dew_point: Float,
         diffuse_horizontal_irrad: Float,
         direct_normal_irrad: Float        
-    ) -> Box<dyn Fn(Vector3D) -> Float> {        
+    ) -> Box<dyn Fn(Vector3D) -> Float + Sync> {        
 
         // Convert local into solar time
         let day = Time::Standard(date.day_of_year());
