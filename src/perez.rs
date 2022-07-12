@@ -325,13 +325,19 @@ impl PerezSky {
         let ret = move |dir: Vector3D| -> Float {
             debug_assert!((1. - dir.length()) < 1e-5);            
 
+
             let cosgamma = sun_position * dir;
             let gamma = cosgamma.acos();
-
+            
             const MIN_DZ: Float = 0.01;
+            
+            if dir.z < MIN_DZ{
+                return 0.0;
+            }
 
             let cos_zeta = if dir.z < MIN_DZ { MIN_DZ } else { dir.z };
-
+            dbg!(cosgamma, gamma, cos_zeta);
+            
             // return without the norm_diff_illum, because we need this closure
             // to calculate it.
             (1. + params[0] * (params[1] / cos_zeta).exp())
@@ -348,11 +354,14 @@ impl PerezSky {
             debug_assert!((1. - bin_dir.length()).abs() < 1e-5);
             norm_diff_illum += ret(dir) * r.bin_solid_angle(i) * bin_dir.z;
         }
+        dbg!(norm_diff_illum);
 
         let norm_diff_illum = diff_illum / (norm_diff_illum * WHTEFFICACY);
 
         // Return
         Box::new(move |dir: Vector3D| -> Float {                                     
+            dbg!(dir);
+            dbg!(ret(dir));
             ret(dir) * norm_diff_illum 
         })
     }
@@ -574,6 +583,7 @@ impl PerezSky {
 mod tests {
 
     use super::*;
+ 
 
     fn read_colour_matrix(filename: String)-> Result<Matrix, String> {
         let content = match std::fs::read_to_string(filename.clone()){
