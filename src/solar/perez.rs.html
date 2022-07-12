@@ -1874,11 +1874,6 @@
 <span id="1834">1834</span>
 <span id="1835">1835</span>
 <span id="1836">1836</span>
-<span id="1837">1837</span>
-<span id="1838">1838</span>
-<span id="1839">1839</span>
-<span id="1840">1840</span>
-<span id="1841">1841</span>
 </pre><pre class="rust"><code><span class="comment">/*
 MIT License
 Copyright (c) 2021 Germán Molina
@@ -2216,9 +2211,7 @@ SOFTWARE.
                 <span class="kw">return</span> <span class="number">0.0</span>;
             }
 
-            <span class="kw">let</span> <span class="ident">cos_zeta</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">dir</span>.<span class="ident">z</span> <span class="op">&lt;</span> <span class="ident">MIN_DZ</span> { <span class="ident">MIN_DZ</span> } <span class="kw">else</span> { <span class="ident">dir</span>.<span class="ident">z</span> };
-            <span class="macro">dbg!</span>(<span class="ident">cosgamma</span>, <span class="ident">gamma</span>, <span class="ident">cos_zeta</span>);
-            
+            <span class="kw">let</span> <span class="ident">cos_zeta</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">dir</span>.<span class="ident">z</span> <span class="op">&lt;</span> <span class="ident">MIN_DZ</span> { <span class="ident">MIN_DZ</span> } <span class="kw">else</span> { <span class="ident">dir</span>.<span class="ident">z</span> };            
             <span class="comment">// return without the norm_diff_illum, because we need this closure</span>
             <span class="comment">// to calculate it.</span>
             (<span class="number">1.</span> <span class="op">+</span> <span class="ident">params</span>[<span class="number">0</span>] <span class="op">*</span> (<span class="ident">params</span>[<span class="number">1</span>] <span class="op">/</span> <span class="ident">cos_zeta</span>).<span class="ident">exp</span>())
@@ -2234,15 +2227,12 @@ SOFTWARE.
             <span class="kw">let</span> <span class="ident">bin_dir</span> <span class="op">=</span> <span class="ident">r</span>.<span class="ident">bin_dir</span>(<span class="ident">i</span>);
             <span class="macro">debug_assert!</span>((<span class="number">1.</span> <span class="op">-</span> <span class="ident">bin_dir</span>.<span class="ident">length</span>()).<span class="ident">abs</span>() <span class="op">&lt;</span> <span class="number">1e-5</span>);
             <span class="ident">norm_diff_illum</span> <span class="op">+</span><span class="op">=</span> <span class="ident">ret</span>(<span class="ident">dir</span>) <span class="op">*</span> <span class="ident">r</span>.<span class="ident">bin_solid_angle</span>(<span class="ident">i</span>) <span class="op">*</span> <span class="ident">bin_dir</span>.<span class="ident">z</span>;
-        }
-        <span class="macro">dbg!</span>(<span class="ident">norm_diff_illum</span>);
+        }        
 
         <span class="kw">let</span> <span class="ident">norm_diff_illum</span> <span class="op">=</span> <span class="ident">diff_illum</span> <span class="op">/</span> (<span class="ident">norm_diff_illum</span> <span class="op">*</span> <span class="ident">WHTEFFICACY</span>);
 
         <span class="comment">// Return</span>
         <span class="ident">Box::new</span>(<span class="kw">move</span> <span class="op">|</span><span class="ident">dir</span>: <span class="ident">Vector3D</span><span class="op">|</span> -&gt; <span class="ident">Float</span> {                                     
-            <span class="macro">dbg!</span>(<span class="ident">dir</span>);
-            <span class="macro">dbg!</span>(<span class="ident">ret</span>(<span class="ident">dir</span>));
             <span class="ident">ret</span>(<span class="ident">dir</span>) <span class="op">*</span> <span class="ident">norm_diff_illum</span> 
         })
     }
