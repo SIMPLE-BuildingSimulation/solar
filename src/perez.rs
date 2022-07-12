@@ -335,9 +335,7 @@ impl PerezSky {
                 return 0.0;
             }
 
-            let cos_zeta = if dir.z < MIN_DZ { MIN_DZ } else { dir.z };
-            dbg!(cosgamma, gamma, cos_zeta);
-            
+            let cos_zeta = if dir.z < MIN_DZ { MIN_DZ } else { dir.z };            
             // return without the norm_diff_illum, because we need this closure
             // to calculate it.
             (1. + params[0] * (params[1] / cos_zeta).exp())
@@ -353,15 +351,12 @@ impl PerezSky {
             let bin_dir = r.bin_dir(i);
             debug_assert!((1. - bin_dir.length()).abs() < 1e-5);
             norm_diff_illum += ret(dir) * r.bin_solid_angle(i) * bin_dir.z;
-        }
-        dbg!(norm_diff_illum);
+        }        
 
         let norm_diff_illum = diff_illum / (norm_diff_illum * WHTEFFICACY);
 
         // Return
         Box::new(move |dir: Vector3D| -> Float {                                     
-            dbg!(dir);
-            dbg!(ret(dir));
             ret(dir) * norm_diff_illum 
         })
     }
