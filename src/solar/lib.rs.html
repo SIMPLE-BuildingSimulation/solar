@@ -602,6 +602,9 @@
 <span id="562">562</span>
 <span id="563">563</span>
 <span id="564">564</span>
+<span id="565">565</span>
+<span id="566">566</span>
+<span id="567">567</span>
 </pre><pre class="rust"><code><span class="comment">/*
 MIT License
 Copyright (c) 2021 Germán Molina
@@ -621,6 +624,21 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */</span>
+
+<span class="attribute">#![<span class="ident">deny</span>(<span class="ident">missing_docs</span>)]</span>
+
+<span class="doccomment">//! Solar calculations library. Based on Duffie and Beckman&#39;s excellent book.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! We follow the convention of the book. This means that everything is in</span>
+<span class="doccomment">//! international units, and times are solar. Angles (inputs and outputs) are</span>
+<span class="doccomment">//! in Radians but can be converted into Degrees through the in_degrees() and</span>
+<span class="doccomment">//! in_radiance() functions.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! Solar azimuth angle is the angular displacement from south of the</span>
+<span class="doccomment">//! projection of beam radiation on the horizontal plane (Figure 1.6.1 of the Book).</span>
+<span class="doccomment">//! Displacements east of south are negative and west of south are positive.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! North points in the Y direction. East points in the X direction. Up points in Z.</span>
 
 <span class="kw">use</span> <span class="ident">geometry3d::Vector3D</span>;
 
@@ -653,38 +671,28 @@ SOFTWARE.
     <span class="number">1.</span> <span class="op">/</span> (<span class="ident">solar_zenith</span>.<span class="ident">cos</span>() <span class="op">+</span> <span class="number">0.15</span> <span class="op">*</span> (<span class="number">93.885</span> <span class="op">-</span> <span class="ident">solar_zenith</span>.<span class="ident">to_degrees</span>()).<span class="ident">powf</span>(<span class="op">-</span><span class="number">1.253</span>))
 }
 
-<span class="doccomment">/// Solar calculations library. Based on Duffie and Beckman&#39;s excellent book.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// We follow the convention of the book. This means that everything is in</span>
-<span class="doccomment">/// international units, and times are solar. Angles (inputs and outputs) are</span>
-<span class="doccomment">/// in Radians but can be converted into Degrees through the in_degrees() and</span>
-<span class="doccomment">/// in_radiance() functions.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// Solar azimuth angle is the angular displacement from south of the</span>
-<span class="doccomment">/// projection of beam radiation on the horizontal plane (Figure 1.6.1 of the Book).</span>
-<span class="doccomment">/// Displacements east of south are negative and west of south are positive.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// North points in the Y direction. East points in the X direction. Up points in Z.</span>
-
 <span class="doccomment">/// The solar equivalent of Date&#39;s &quot;day of the year&quot;. The</span>
 <span class="doccomment">/// distinction is there so that we don&#39;t mistake solar and</span>
 <span class="doccomment">/// standard time</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Solar</span> {
-    <span class="comment">// Day of the year</span>
-    <span class="comment">//n: Float,</span>
-    <span class="doccomment">/// Latitude in Radians</span>
+    <span class="doccomment">/// Latitude in Radians. South is negative, North is positive.</span>
     <span class="ident">latitude</span>: <span class="ident">Float</span>,
 
-    <span class="doccomment">/// Longitude (in Radians)</span>
+    <span class="doccomment">/// Longitude (in Radians). East is negative, West is positive</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// &gt; Note that this is Radiance&#39;s conventions, which is the opposite of EPW files.</span>
     <span class="ident">longitude</span>: <span class="ident">Float</span>,
 
-    <span class="doccomment">/// Standard meridian (in Radians)</span>
+    <span class="doccomment">/// Standard meridian (in Radians). East is negative, West is positive.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// This value is essentially `-15.0*TimeZone` (e.g., GMT+1 becomes -15.0)</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">///  &gt; Note that this is Radiance&#39;s conventions, which is the opposite of EPW files.</span>
     <span class="ident">standard_meridian</span>: <span class="ident">Float</span>,
 }
 
 <span class="doccomment">/// W/m2</span>
 <span class="kw">const</span> <span class="ident">SOLAR_CONSTANT</span>: <span class="ident">Float</span> <span class="op">=</span> <span class="number">1367.0</span>;
-
 
 <span class="doccomment">/// Solar or Standard time, containing the day of the year &#39;n&#39;</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Copy</span>)]</span>
@@ -903,8 +911,6 @@ SOFTWARE.
         <span class="macro">println!</span>(<span class="string">&quot;x:{}, y:{}&quot;</span>, <span class="ident">x</span>, <span class="ident">y</span>);
         <span class="bool-val">false</span>
     }
-
-    
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_unwrap_time</span>() {
@@ -1167,5 +1173,5 @@ SOFTWARE.
     }
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="solar" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0-nightly (38b72154d 2022-07-11)" ></div>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="solar" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0-nightly (1c7b36d4d 2022-07-12)" ></div>
 </body></html>
