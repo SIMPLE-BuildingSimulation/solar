@@ -37,40 +37,55 @@ pub enum SkyUnits {
     Visible,
 }
 
-/// This struct packs functions from two sources:
+/// This struct packs functions from three sources:
+///
 /// 1. Perez, R., Ineichen, P., Seals, R., Michalsky, J. and Stewart, R. (1990), "Modeling daylight availability and irradiance components from direct and global irradiance"
 /// 2. Perez, R., R. Seals, and J. Michalsky (1993) All-Weather Model for Sky Luminance Distribution - Preliminary Configuration and Validation
-/// I do not have access to the latter, so I borrowed code from Radiance's [`gendaymtx.c`](https://github.com/NREL/Radiance/blob/master/src/gen/gendaymtx.c) file
+/// 3. EnergyPlus's Engineering Reference
+///
+/// I do not have access to the second one, so I borrowed code from Radiance's [`gendaymtx.c`](https://github.com/NREL/Radiance/blob/master/src/gen/gendaymtx.c) file
 pub struct PerezSky {}
 
 impl PerezSky {
-    /// Equation 1
+    /// Calculates the Perez's clearness Index
+    ///
+    /// This is Equation 1 in Perez et al. 1990, and 5.19 in EnergyPlus's Engineering Reference
     pub fn sky_clearness(
         diffuse_horizontal_irrad: Float,
         direct_normal_irrad: Float,
         solar_zenith: Float,
     ) -> Float {
         const K: Float = 1.041; // Next to equation 1 of the paper
-        let z_cubed = solar_zenith * solar_zenith * solar_zenith;
-        ((diffuse_horizontal_irrad + direct_normal_irrad) / diffuse_horizontal_irrad + K * z_cubed)
-            / (1. + K * z_cubed)
+        let z3 = solar_zenith.powi(3);
+        ((diffuse_horizontal_irrad + direct_normal_irrad) / diffuse_horizontal_irrad + K * z3)
+            / (1. + K * z3)
     }
 
-    /// Equation 2
+    /// Calculates Perez's sky brightness
+    ///
+    /// Equation 2 of Perez et al. 1990, and equation 5.19 in EnergyPlus' Engineering Reference
     pub fn sky_brightness(
         diffuse_horizontal_irrad: Float,
         air_mass: Float,
         extraterrestrial_irradiance: Float,
     ) -> Float {
-        diffuse_horizontal_irrad * air_mass / extraterrestrial_irradiance
+        let ret = diffuse_horizontal_irrad * air_mass / extraterrestrial_irradiance;
+        if ret < 0.01 {
+            0.01 // limit set by Radiance's gendaymtx.c
+        } else {
+            ret
+        }
     }
 
-    /// Equation 3... dew_point_temp in C
+    /// Precipitable water content based on dew point. If now known, Radiance seems to use
+    /// a value of 11C.
+    ///
+    /// Source: Equation 3... dew_point_temp in C
     pub fn precipitable_water_content(dew_point_temp: Float) -> Float {
         (0.07 * dew_point_temp - 0.075).exp()
     }
 
-    /// Get the sky clearness category (Table 1 in the 1990 paper)
+    /// Get the sky clearness category, usef for accessing Table 1 in the 1990 paper
     pub fn clearness_category(clearness_index: Float) -> usize {
         if clearness_index < 1. {
             panic!(
@@ -101,28 +116,31 @@ impl PerezSky {
         }
     }
 
-    // /// Calculates the direct illuminance/diffuse radiance ratio
-    // /// according to Equation 8 and Table 4 of Perez et al. 1990
-    pub fn direct_illuminance_ratio(p_water_content: Float, zenit: Float, sky_brightness: Float, index: usize)->Float{
-        if index > 7 {
-            panic!("Table 4 of Perez's paper has only 8 sky clearness categories (starting from 0)... received {}", index)
-        }
-        const TABLE : [(Float, Float, Float, Float); 8] =
-        [
-            (  57.20, -4.55, -2.98, 117.12 ),
-            (  98.99, -3.46, -1.21,  12.38 ),
-            ( 109.83, -4.90, -1.71,  -8.81 ),
-            ( 110.34, -5.84, -1.99,  -4.56 ),
-            ( 106.36, -3.97, -1.75,  -6.16 ),
-            ( 107.19, -1.25, -1.51, -26.73 ),
-            ( 105.75,  0.77, -1.26, -34.44 ),
-            ( 101.18,  1.58, -1.10,  -8.29 )
+    /// Calculates the direct illuminance/diffuse radiance ratio
+    /// according to Equation 8 and Table 4 of Perez et al. 1990
+    pub fn direct_illuminance_ratio(
+        p_water_content: Float,
+        zenit: Float,
+        sky_brightness: Float,
+        index: usize,
+    ) -> Float {
+        assert!(index <= 7, "Table 4 of Perez's paper has only 8 sky clearness categories (starting from 0)... received {}", index);
+
+        const TABLE: [(Float, Float, Float, Float); 8] = [
+            (57.20, -4.55, -2.98, 117.12),
+            (98.99, -3.46, -1.21, 12.38),
+            (109.83, -4.90, -1.71, -8.81),
+            (110.34, -5.84, -1.99, -4.56),
+            (106.36, -3.97, -1.75, -6.16),
+            (107.19, -1.25, -1.51, -26.73),
+            (105.75, 0.77, -1.26, -34.44),
+            (101.18, 1.58, -1.10, -8.29),
         ];
 
-        let v = TABLE[index].0 +
-        TABLE[index].1*p_water_content +
-        TABLE[index].2*(5.73*zenit - 5.).exp() +
-        TABLE[index].3* sky_brightness;
+        let v = TABLE[index].0
+            + TABLE[index].1 * p_water_content
+            + TABLE[index].2 * (5.73 * zenit - 5.).exp()
+            + TABLE[index].3 * sky_brightness;
 
         // return
         v.clamp(0., 9e9)
@@ -213,17 +231,15 @@ impl PerezSky {
 
         let index = Self::clearness_category(epsilon);
 
-        if epsilon > 1.065 && epsilon < 2.8 {
-            if delta < 0.2 {
-                delta = 0.2;
-            }
+        if epsilon > 1.065 && epsilon < 2.8 && delta < 0.2 {
+            delta = 0.2;
         }
 
         /* Get Perez coefficients */
         let mut x = [[0.0; 4]; 5];
-        for i in 0..5 {
-            for j in 0..4 {
-                x[i][j] = TABLE[index][4 * i + j];
+        for (i, xitem) in x.iter_mut().enumerate() {
+            for (j, inneritem) in xitem.iter_mut().enumerate() {
+                *inneritem = TABLE[index][4 * i + j];
             }
         }
 
@@ -261,9 +277,8 @@ impl PerezSky {
         date: Date,
         dew_point: Float,
         diffuse_horizontal_irrad: Float,
-        direct_normal_irrad: Float        
-    ) -> Box<dyn Fn(Vector3D) -> Float + Sync> {        
-
+        direct_normal_irrad: Float,
+    ) -> Box<dyn Fn(Vector3D) -> Float + Sync> {
         // Convert local into solar time
         let day = Time::Standard(date.day_of_year());
         let sun_position = solar.sun_position(day).unwrap();
@@ -274,19 +289,15 @@ impl PerezSky {
         debug_assert!((1. - sun_position.length()) < 1e-5);
 
         let cos_zenit = sun_position.z;
+        // (this is done twice... if you are fixing this, please search for
+        // similar code in this same file and fix that as well)
         // If Dir is normalized, then its Z = cos(Zenith)
         let zenith = if cos_zenit <= 0. {
             // Limit zenith to 90 degrees
             PI / 2.
-        } else if cos_zenit >= 0.9986295347545738 {
-            // Limit Zenith to 3 degrees minimum
-            /*
-                The threshold above is equal to (3.*PI/180.).cos()
-                would that have been optimized by the compiler?? I guess, but
-                it did not allow me to create a constant of that value... so I
-                did this just in case
-            */
-            (3. * PI / 180.).acos()
+        } else if cos_zenit >= (3. as Float).to_radians().cos() {
+            // I pressume this is calculated at compile time.
+            (3. as Float).to_radians()
         } else {
             cos_zenit.acos()
         };
@@ -294,13 +305,13 @@ impl PerezSky {
         let apwc = Self::precipitable_water_content(dew_point);
         let air_mass = air_mass(zenith);
         let extraterrestrial_irradiance = solar.normal_extraterrestrial_radiation(day);
-        // RADIANCE SETS THESE LIMITS... I don't know if they are in the paper
+
         let sky_brightness = Self::sky_brightness(
             diffuse_horizontal_irrad,
             air_mass,
             extraterrestrial_irradiance,
         )
-        .clamp(0.01, 9e9);
+        .clamp(0.01, 9e9); // RADIANCE SETS THESE LIMITS... I don't know if they are in the paper
         let sky_clearness =
             Self::sky_clearness(diffuse_horizontal_irrad, direct_normal_irrad, zenith)
                 .clamp(-9e9, 11.9);
@@ -315,27 +326,20 @@ impl PerezSky {
             diff_illum = diffuse_horizontal_irrad * WHTEFFICACY;
             // dir_illum = direct_normal_irrad * WHTEFFICACY;
         }
-        
-        
 
         // Calculate Perez params
         let params = Self::calc_params(zenith, sky_clearness, sky_brightness);
 
         // Build closure
         let ret = move |dir: Vector3D| -> Float {
-            debug_assert!((1. - dir.length()) < 1e-5);            
-
+            debug_assert!((1. - dir.length()) < 1e-5);
 
             let cosgamma = sun_position * dir;
             let gamma = cosgamma.acos();
-            
-            const MIN_DZ: Float = 0.01;
-            
-            if dir.z < MIN_DZ{
-                return 0.0;
-            }
 
-            let cos_zeta = if dir.z < MIN_DZ { MIN_DZ } else { dir.z };            
+            const MIN_DZ: Float = 0.01;
+
+            let cos_zeta = if dir.z < MIN_DZ { MIN_DZ } else { dir.z };
             // return without the norm_diff_illum, because we need this closure
             // to calculate it.
             (1. + params[0] * (params[1] / cos_zeta).exp())
@@ -350,17 +354,25 @@ impl PerezSky {
 
             let bin_dir = r.bin_dir(i);
             debug_assert!((1. - bin_dir.length()).abs() < 1e-5);
-            norm_diff_illum += ret(dir) * r.bin_solid_angle(i) * bin_dir.z;
-        }        
+            let skypatch = ret(dir);
+            if skypatch < 0.0 {
+                dbg!(skypatch);
+            }
+            norm_diff_illum += skypatch * r.bin_solid_angle(i) * bin_dir.z;
+        }
 
         let norm_diff_illum = diff_illum / (norm_diff_illum * WHTEFFICACY);
 
         // Return
-        Box::new(move |dir: Vector3D| -> Float {                                     
-            ret(dir) * norm_diff_illum 
+        Box::new(move |dir: Vector3D| -> Float {
+            let sky = ret(dir);
+            sky * norm_diff_illum
         })
     }
 
+    /// Creates a vector of values representing the luminance/radiance of each
+    /// patch in the sky. This is meant to be used with the Daylight Coefficient approach.
+    #[allow(clippy::too_many_arguments)]
     pub fn gen_sky_vec(
         mf: usize,
         solar: &Solar,
@@ -373,10 +385,23 @@ impl PerezSky {
     ) -> Result<Matrix, String> {
         let r = ReinhartSky::new(mf);
         let mut vec = Matrix::new(0.0, r.n_bins, 1);
-        Self::update_sky_vec(&mut vec, mf, solar, date, weather_data, units, albedo, add_sky, add_sun)?;
+        Self::update_sky_vec(
+            &mut vec,
+            mf,
+            solar,
+            date,
+            weather_data,
+            units,
+            albedo,
+            add_sky,
+            add_sun,
+        )?;
         Ok(vec)
     }
 
+    /// Updates a vector of values representing the luminance/radiance of each
+    /// patch in the sky. This is meant to be used with the Daylight Coefficient approach.
+    #[allow(clippy::too_many_arguments)]
     pub fn update_sky_vec(
         vec: &mut Matrix,
         mf: usize,
@@ -387,7 +412,8 @@ impl PerezSky {
         albedo: Float,
         add_sky: bool,
         add_sun: bool,
-    ) -> Result<(), String> {        
+    ) -> Result<(), String> {
+        // https://github.com/NREL/EnergyPlus/blob/2f8b2517baa1e6e553fe766f4587a0926b4f5032/third_party/ssc/shared/lib_irradproc.cpp
 
         let r = ReinhartSky::new(mf);
         let (rows, cols) = vec.size();
@@ -396,37 +422,22 @@ impl PerezSky {
             return Err(format!("when update_sky_vec() : number of elements of input vector ({}) does not match the number of bins for the Reinhart subdivition (MF {} require {} bins)", rows, mf, r.n_bins));
         }
 
-        let dew_point = match weather_data.dew_point_temperature {
-            None => {
-                return Err(format!(
-                    "Weather data needs dew point temperature for calculating sky-vec"
-                ))
-            }
-            Some(v) => v,
-        };
-        let diffuse_horizontal_irrad = match weather_data.diffuse_horizontal_radiation {
-            None => {
-                return Err(format!(
-                    "Weather data needs diffuse_horizontal_radiation for calculating sky-vec"
-                ))
-            }
-            Some(v) => v,
-        };
-        let direct_normal_irrad = match weather_data.direct_normal_radiation {
-            None => {
-                return Err(format!(
-                    "Weather data needs direct_normal_radiation for calculating sky-vec"
-                ))
-            }
-            Some(v) => v,
-        };
+        let dew_point = weather_data
+            .dew_point_temperature
+            .expect("Weather data needs dew point temperature for calculating sky-vec");
+        let diffuse_horizontal_irrad = weather_data
+            .diffuse_horizontal_radiation
+            .expect("Weather data needs diffuse_horizontal_radiation for calculating sky-vec");
+        let direct_normal_irrad = weather_data
+            .direct_normal_radiation
+            .expect("Weather data needs direct_normal_radiation for calculating sky-vec");
 
         // If it is nighttime, just fill with zeroes
-        if direct_normal_irrad + diffuse_horizontal_irrad < 1e-4 {            
-            for bin in 0..r.n_bins {                                
+        if direct_normal_irrad + diffuse_horizontal_irrad < 1e-4 {
+            for bin in 0..r.n_bins {
                 vec.set(bin, 0, 0.0)?;
             }
-            return Ok(())
+            return Ok(());
         }
 
         /*
@@ -434,30 +445,23 @@ impl PerezSky {
         and then here... refactoring might help
         */
         let day = Time::Standard(date.day_of_year());
-        let sun_position = match solar.sun_position(day){
-            Some(pos)=>pos,
-            None =>{
-                for bin in 0..r.n_bins {                                
+        let sun_position = match solar.sun_position(day) {
+            Some(pos) => pos,
+            None => {
+                for bin in 0..r.n_bins {
                     vec.set(bin, 0, 0.0)?;
                 }
-                return Ok(())
+                return Ok(());
             }
-
         };
         let day = solar.unwrap_solar_time(day);
         let cos_zenit = sun_position.z;
         let zenith = if cos_zenit <= 0. {
             // Limit zenith to 90 degrees
             PI / 2.
-        } else if cos_zenit >= 0.9986295347545738 {
-            // Limit Zenith to 3 degrees minimum
-            /*
-                The threshold above is equal to (3.*PI/180.).cos()
-                would that have been optimized by the compiler?? I guess, but
-                it did not allow me to create a constant of that value... so I
-                did this just in case
-            */
-            (3. * PI / 180.).acos()
+        } else if cos_zenit >= (3. as Float).to_radians().cos() {
+            // I pressume this is calculated at compile time.
+            (3. as Float).to_radians()
         } else {
             cos_zenit.acos()
         };
@@ -471,66 +475,63 @@ impl PerezSky {
         )
         .clamp(0.01, 9e9);
         let sky_clearness =
-        Self::sky_clearness(diffuse_horizontal_irrad, direct_normal_irrad, zenith)
-            .clamp(-9e9, 11.9);
+            Self::sky_clearness(diffuse_horizontal_irrad, direct_normal_irrad, zenith)
+                .clamp(-9e9, 11.9);
 
-        let index = Self::clearness_category(sky_clearness);
+        let clearness_category = Self::clearness_category(sky_clearness);
         let mut diff_illum = diffuse_horizontal_irrad
-            * Self::diffuse_illuminance_ratio(apwc, cos_zenit, sky_brightness, index);
-        let mut dir_illum = direct_normal_irrad * Self::direct_illuminance_ratio(apwc, zenith, sky_brightness, index);
+            * Self::diffuse_illuminance_ratio(apwc, cos_zenit, sky_brightness, clearness_category);
+        let mut dir_illum = direct_normal_irrad
+            * Self::direct_illuminance_ratio(apwc, zenith, sky_brightness, clearness_category);
 
         if let SkyUnits::Solar = units {
             diff_illum = diffuse_horizontal_irrad * WHTEFFICACY;
             dir_illum = direct_normal_irrad * WHTEFFICACY;
         }
 
-
         // Add ground
-        if albedo > 1e-8{
-
+        if albedo > 1e-8 {
             let mut global_horizontal = diff_illum;
-            if cos_zenit > 0. {                    
+            if cos_zenit > 0. {
                 global_horizontal += dir_illum * cos_zenit;
             }
-            let ground = albedo * global_horizontal / PI/WHTEFFICACY;                
-            vec.set(0, 0, ground)?;            
+            let ground = albedo * global_horizontal / PI / WHTEFFICACY;
+            vec.set(0, 0, ground)?;
         }
-
 
         if add_sky {
             let sky_func = Self::get_sky_func_standard_time(
                 units,
-                &solar,
+                solar,
                 date,
                 dew_point,
                 diffuse_horizontal_irrad,
-                direct_normal_irrad,                
+                direct_normal_irrad,
             );
 
-            for bin in 1..r.n_bins {                
+            for bin in 1..r.n_bins {
                 let dir = r.bin_dir(bin);
-                let v = sky_func(dir);                
+                let v = sky_func(dir);
                 vec.set(bin, 0, v)?;
             }
         }
-        
-        if add_sun && direct_normal_irrad > 1e-4 {
-            
-            const N_SUNS : usize = 4;
 
-            /* IDENTIFY CLOSESTS PATCHES */            
+        if add_sun && direct_normal_irrad > 1e-4 {
+            const N_SUNS: usize = 4;
+
+            /* IDENTIFY CLOSESTS PATCHES */
             // Store the closest bin and the dot product between
-            // the sun position and the bin position            
-            let mut closests : [(usize, Float); N_SUNS] = [ (0, -1.); N_SUNS];            
-            for bin in 0..r.n_bins{
+            // the sun position and the bin position
+            let mut closests: [(usize, Float); N_SUNS] = [(0, -1.); N_SUNS];
+            for bin in 0..r.n_bins {
                 let dir = r.bin_dir(bin);
                 let dot = dir * sun_position;
-                for sun_index in 0..N_SUNS{
+                for sun_index in 0..N_SUNS {
                     // A greated dot product implies being more close
-                    if dot > closests[sun_index].1{
+                    if dot > closests[sun_index].1 {
                         // Shift vector
-                        for k in (sun_index+1..N_SUNS).rev(){
-                            closests[k] = closests[k-1];
+                        for k in (sun_index + 1..N_SUNS).rev() {
+                            closests[k] = closests[k - 1];
                         }
                         closests[sun_index] = (bin, dot);
                         break;
@@ -538,170 +539,201 @@ impl PerezSky {
                 }
             }
             /* SET WEIGHTS */
-            let mut weights : [Float; N_SUNS] = [ -1.; N_SUNS];            
-            let mut tot_weight : Float = 0.0;
-            for k in (0..N_SUNS).rev(){
-                let this_w = 1./(1.002 - closests[k].1);
+            let mut weights: [Float; N_SUNS] = [-1.; N_SUNS];
+            let mut tot_weight: Float = 0.0;
+            for k in (0..N_SUNS).rev() {
+                let this_w = 1. / (1.002 - closests[k].1);
                 weights[k] = this_w;
                 tot_weight += this_w;
             }
 
-            
-            for k in (0..N_SUNS).rev(){
-                // What if Visible? or Solar? One of them is wrong.
-                let mut val_add = weights[k] * dir_illum / (WHTEFFICACY * tot_weight );
-
-                // Divide by solid angle... of patch or sharp sun.
-                /* 
-                val_add /= (fixed_sun_sa > 0)	? fixed_sun_sa : rh_dom[near_patch[k]];
-                */
+            for k in (0..N_SUNS).rev() {
+                let mut val_add = weights[k] * dir_illum / (WHTEFFICACY * tot_weight);
                 let bin = closests[k].0;
                 let solid_angle = r.bin_solid_angle(bin);
                 val_add /= solid_angle;
                 // Add
                 let old = vec.get(bin, 0).unwrap();
-                vec.set(bin, 0, old + val_add).unwrap(); 
+                vec.set(bin, 0, old + val_add).unwrap();
             }
-
-
-        }// finished adding suns
+        } // finished adding suns
 
         // Return
         Ok(())
     }
 }
 
-
-
-
 #[cfg(test)]
 mod tests {
 
     use super::*;
- 
 
-    fn read_colour_matrix(filename: String)-> Result<Matrix, String> {
-        let content = match std::fs::read_to_string(filename.clone()){
-            Ok(v)=>v,
-            Err(_)=>{
-                return Err(format!("Could not read Matrix file '{}'", filename))
-            }
+    fn read_colour_matrix(filename: String) -> Result<Matrix, String> {
+        let content = match std::fs::read_to_string(filename.clone()) {
+            Ok(v) => v,
+            Err(_) => return Err(format!("Could not read Matrix file '{}'", filename)),
         };
-        
+
         // Read header
-        let mut nrows : Option<usize> = None;
-        let mut ncols : Option<usize> = None;
+        let mut nrows: Option<usize> = None;
+        let mut ncols: Option<usize> = None;
         // let mut ncomp : Option<usize> = None;
         let mut header_lines = 0;
-        for line in content.lines(){
-            header_lines +=1;
+        for line in content.lines() {
+            header_lines += 1;
             // If we reach a blank line, we are over with the header.
-            if line.len() == 0 || line.as_bytes()[0].is_ascii_whitespace(){
+            if line.len() == 0 || line.as_bytes()[0].is_ascii_whitespace() {
                 break;
             }
-    
-            if line.starts_with("NROWS"){
-                let tuple : Vec<&str>= line.split('=').collect();
+
+            if line.starts_with("NROWS") {
+                let tuple: Vec<&str> = line.split('=').collect();
                 if tuple.len() != 2 {
-                    return Err(format!("Expecting NROWS line to be in the format 'NROWS=number'... found '{}'", line));
+                    return Err(format!(
+                        "Expecting NROWS line to be in the format 'NROWS=number'... found '{}'",
+                        line
+                    ));
                 }
-                nrows = match tuple[1].parse::<usize>(){
-                    Ok(v)=>Some(v),
-                    Err(_)=>{return Err(format!("Expecting NROWS line to be in the format 'NROWS=number', but did not find a number... found '{}'", tuple[1]));}
-                };            
-                continue;
-            }
-            if line.starts_with("NCOLS"){
-                let tuple : Vec<&str>= line.split('=').collect();
-                if tuple.len() != 2 {
-                    return Err(format!("Expecting NCOLS line to be in the format 'NCOLS=number'... found '{}'", line));
-                }
-                ncols = match tuple[1].parse::<usize>(){
-                    Ok(v)=>Some(v),
-                    Err(_)=>{return Err(format!("Expecting NCOLS line to be in the format 'NCOLS=number', but did not find a number... found '{}'", tuple[1]));}
+                nrows = match tuple[1].parse::<usize>() {
+                    Ok(v) => Some(v),
+                    Err(_) => {
+                        return Err(format!("Expecting NROWS line to be in the format 'NROWS=number', but did not find a number... found '{}'", tuple[1]));
+                    }
                 };
                 continue;
             }
-            if line.starts_with("NCOMP"){
-                let tuple : Vec<&str>= line.split('=').collect();
+            if line.starts_with("NCOLS") {
+                let tuple: Vec<&str> = line.split('=').collect();
                 if tuple.len() != 2 {
-                    return Err(format!("Expecting NCOMP line to be in the format 'NCOMP=number'... found '{}'", line));
+                    return Err(format!(
+                        "Expecting NCOLS line to be in the format 'NCOLS=number'... found '{}'",
+                        line
+                    ));
                 }
-                let ncomp = match tuple[1].parse::<usize>(){
-                    Ok(fvalue)=>fvalue,
-                    Err(_)=>{return Err(format!("Expecting NCOMP line to be in the format 'NCOMP=number', but did not find a number... found '{}'", tuple[1]));}
+                ncols = match tuple[1].parse::<usize>() {
+                    Ok(v) => Some(v),
+                    Err(_) => {
+                        return Err(format!("Expecting NCOLS line to be in the format 'NCOLS=number', but did not find a number... found '{}'", tuple[1]));
+                    }
+                };
+                continue;
+            }
+            if line.starts_with("NCOMP") {
+                let tuple: Vec<&str> = line.split('=').collect();
+                if tuple.len() != 2 {
+                    return Err(format!(
+                        "Expecting NCOMP line to be in the format 'NCOMP=number'... found '{}'",
+                        line
+                    ));
+                }
+                let ncomp = match tuple[1].parse::<usize>() {
+                    Ok(fvalue) => fvalue,
+                    Err(_) => {
+                        return Err(format!("Expecting NCOMP line to be in the format 'NCOMP=number', but did not find a number... found '{}'", tuple[1]));
+                    }
                 };
                 if ncomp != 3 {
-                    return Err(format!("Expecting 3 components in Colour Matrix... found {}", ncomp))
+                    return Err(format!(
+                        "Expecting 3 components in Colour Matrix... found {}",
+                        ncomp
+                    ));
                 }
                 continue;
             }
-                    
         }
-    
+
         // Check that the header info was fine
-        if nrows.is_none(){
-            return Err(format!("Matrix in file '{}' does not include number of rows in header", filename));
+        if nrows.is_none() {
+            return Err(format!(
+                "Matrix in file '{}' does not include number of rows in header",
+                filename
+            ));
         }
-        if ncols.is_none(){
-            return Err(format!("Matrix in file '{}' does not include number of columns in header", filename));
+        if ncols.is_none() {
+            return Err(format!(
+                "Matrix in file '{}' does not include number of columns in header",
+                filename
+            ));
         }
         let nrows = nrows.unwrap();
         let ncols = ncols.unwrap();
         let mut matrix = Matrix::new(0.0, nrows, ncols);
-    
+
         // Now go on.
-        
-        for (nrow,line) in content.lines().skip(header_lines).enumerate(){
+
+        for (nrow, line) in content.lines().skip(header_lines).enumerate() {
             let ln = nrow + header_lines;
-            let values : Vec<&str> = line.split_ascii_whitespace().collect();
-            if values.len() != 3*ncols {
-                return Err(format!("Expecting {} values in line {}... found {}", 3*ncols, ln, values.len()));
+            let values: Vec<&str> = line.split_ascii_whitespace().collect();
+            if values.len() != 3 * ncols {
+                return Err(format!(
+                    "Expecting {} values in line {}... found {}",
+                    3 * ncols,
+                    ln,
+                    values.len()
+                ));
             }
             let mut ncol = 0;
-            while ncol < ncols{
-                let r = match values[3*ncol].parse::<Float>(){
-                    Ok(fvalue)=>fvalue,
-                    Err(_)=>{return Err(format!("Incorrectly formated line {} in matrix in file '{}'", ln, filename));}
+            while ncol < ncols {
+                let r = match values[3 * ncol].parse::<Float>() {
+                    Ok(fvalue) => fvalue,
+                    Err(_) => {
+                        return Err(format!(
+                            "Incorrectly formated line {} in matrix in file '{}'",
+                            ln, filename
+                        ));
+                    }
                 };
-                let g = match values[3*ncol+1].parse::<Float>(){
-                    Ok(fvalue)=>fvalue,
-                    Err(_)=>{return Err(format!("Incorrectly formated line {} in matrix in file '{}'", ln, filename));}
+                let g = match values[3 * ncol + 1].parse::<Float>() {
+                    Ok(fvalue) => fvalue,
+                    Err(_) => {
+                        return Err(format!(
+                            "Incorrectly formated line {} in matrix in file '{}'",
+                            ln, filename
+                        ));
+                    }
                 };
-                let b = match values[3*ncol+2].parse::<Float>(){
-                    Ok(fvalue)=>fvalue,
-                    Err(_)=>{return Err(format!("Incorrectly formated line {} in matrix in file '{}'", ln, filename));}
+                let b = match values[3 * ncol + 2].parse::<Float>() {
+                    Ok(fvalue) => fvalue,
+                    Err(_) => {
+                        return Err(format!(
+                            "Incorrectly formated line {} in matrix in file '{}'",
+                            ln, filename
+                        ));
+                    }
                 };
-    
-                matrix.set(nrow,ncol, 0.265*r+0.67*g+0.065*b).unwrap();
-    
+
+                matrix
+                    .set(nrow, ncol, 0.265 * r + 0.67 * g + 0.065 * b)
+                    .unwrap();
+
                 ncol += 1;
             }
         }
-    
-        return Ok(matrix)
-    
+
+        return Ok(matrix);
     }
 
     #[test]
-    fn test_read_colour_matrix(){
-        let exp = [4.9, 13.6385, 13.032, 12.865, 13.445, 14.925, 17.818, 23.1105];
+    fn test_read_colour_matrix() {
+        let exp = [
+            4.9, 13.6385, 13.032, 12.865, 13.445, 14.925, 17.818, 23.1105,
+        ];
         let matrix = read_colour_matrix("./test_data/solar_no_sun.txt".to_string()).unwrap();
         let (nrows, ncols) = matrix.size();
         assert_eq!(ncols, 1);
         assert_eq!(nrows, 146);
 
-        for (nrow,expected) in exp.iter().enumerate(){
-            let found = matrix.get(nrow,0).unwrap();
+        for (nrow, expected) in exp.iter().enumerate() {
+            let found = matrix.get(nrow, 0).unwrap();
             let err = (found - expected).abs();
             assert!(err < 1e-8)
         }
     }
 
-    fn allowed_err(add_sun: bool)->Float{
+    fn allowed_err(add_sun: bool) -> Float {
         if add_sun {
             6.3 // %
-        }else{
+        } else {
             3.33 // %
         }
     }
@@ -709,7 +741,7 @@ mod tests {
     #[test]
     fn test_gen_sky_vec_visible_no_sky() {
         let mf = 1;
-        let lat = -41.41 * PI / 180.;        
+        let lat = -41.41 * PI / 180.;
         let lon = -174.87 * PI / 180.;
         let std_mer = -180. * PI / 180.;
         let month = 1;
@@ -731,44 +763,59 @@ mod tests {
             ..CurrentWeather::default()
         };
 
-        let found_vec = PerezSky::gen_sky_vec(mf, &solar, date, weather_data, units, albedo, add_sky, add_sun).unwrap();
+        let found_vec = PerezSky::gen_sky_vec(
+            mf,
+            &solar,
+            date,
+            weather_data,
+            units,
+            albedo,
+            add_sky,
+            add_sun,
+        )
+        .unwrap();
         println!("{}", found_vec);
         let exp_vec = read_colour_matrix("./test_data/visible_no_sky.txt".to_string()).unwrap();
-        
+
         let (nrows, ncols) = found_vec.size();
         assert_eq!((nrows, ncols), exp_vec.size());
         let mut max_err = 0.0;
         let mut max_err_percent = 0.0;
-        for nrow in 0..nrows{
-            for ncol in 0..ncols{
-                let exp = exp_vec.get(nrow,ncol).unwrap();
-                let found = found_vec.get(nrow,ncol).unwrap();
-                                
-                if exp < 1e-9{
+        for nrow in 0..nrows {
+            for ncol in 0..ncols {
+                let exp = exp_vec.get(nrow, ncol).unwrap();
+                let found = found_vec.get(nrow, ncol).unwrap();
+
+                if exp < 1e-9 {
                     assert!(found < 1e-9, "Expecting Zero, found {}", exp);
-                }else{
+                } else {
                     let allowed_err = allowed_err(add_sun);
-                    let err = (exp - found).abs(); 
-                    let err_percent = 100.*err/exp;
+                    let err = (exp - found).abs();
+                    let err_percent = 100. * err / exp;
                     if err >= max_err {
                         max_err = err;
                     }
                     if err_percent >= max_err_percent {
                         max_err_percent = err_percent
                     }
-                    assert!(err_percent < allowed_err, "err = {} | err_percent = {}%| exp = {}, found = {}", err, err_percent, exp, found);
+                    assert!(
+                        err_percent < allowed_err,
+                        "err = {} | err_percent = {}%| exp = {}, found = {}",
+                        err,
+                        err_percent,
+                        exp,
+                        found
+                    );
                 }
-                
             }
         }
         println!("err = {} | err_percent = {}%", max_err, max_err_percent);
     }
 
-
     #[test]
     fn test_gen_sky_vec_solar_no_sky() {
         let mf = 1;
-        let lat = -41.41 * PI / 180.;        
+        let lat = -41.41 * PI / 180.;
         let lon = -174.87 * PI / 180.;
         let std_mer = -180. * PI / 180.;
         let month = 1;
@@ -790,32 +837,49 @@ mod tests {
             ..CurrentWeather::default()
         };
 
-        let found_vec = PerezSky::gen_sky_vec(mf, &solar, date, weather_data, units, albedo, add_sky, add_sun).unwrap();
+        let found_vec = PerezSky::gen_sky_vec(
+            mf,
+            &solar,
+            date,
+            weather_data,
+            units,
+            albedo,
+            add_sky,
+            add_sun,
+        )
+        .unwrap();
         println!("{}", found_vec);
         let exp_vec = read_colour_matrix("./test_data/solar_no_sky.txt".to_string()).unwrap();
-        
+
         let (nrows, ncols) = found_vec.size();
         assert_eq!((nrows, ncols), exp_vec.size());
         let mut max_err = 0.0;
         let mut max_err_percent = 0.0;
-        for nrow in 0..nrows{
-            for ncol in 0..ncols{
-                let exp = exp_vec.get(nrow,ncol).unwrap();
-                let found = found_vec.get(nrow,ncol).unwrap();
-                
-                if exp < 1e-9{
+        for nrow in 0..nrows {
+            for ncol in 0..ncols {
+                let exp = exp_vec.get(nrow, ncol).unwrap();
+                let found = found_vec.get(nrow, ncol).unwrap();
+
+                if exp < 1e-9 {
                     assert!(found < 1e-9, "Expecting Zero, found {}", exp);
-                }else{
+                } else {
                     let allowed_err = allowed_err(add_sun);
-                    let err = (exp - found).abs(); 
-                    let err_percent = 100.*err/exp;
+                    let err = (exp - found).abs();
+                    let err_percent = 100. * err / exp;
                     if err >= max_err {
                         max_err = err;
                     }
                     if err_percent >= max_err_percent {
                         max_err_percent = err_percent
                     }
-                    assert!(err_percent < allowed_err, "err = {} | err_percent = {}%| exp = {}, found = {}", err, err_percent, exp, found);
+                    assert!(
+                        err_percent < allowed_err,
+                        "err = {} | err_percent = {}%| exp = {}, found = {}",
+                        err,
+                        err_percent,
+                        exp,
+                        found
+                    );
                 }
             }
         }
@@ -825,7 +889,7 @@ mod tests {
     #[test]
     fn test_gen_sky_vec_solar_with_sun() {
         let mf = 1;
-        let lat = -41.41 * PI / 180.;        
+        let lat = -41.41 * PI / 180.;
         let lon = -174.87 * PI / 180.;
         let std_mer = -180. * PI / 180.;
         let month = 1;
@@ -847,32 +911,49 @@ mod tests {
             ..CurrentWeather::default()
         };
 
-        let found_vec = PerezSky::gen_sky_vec(mf, &solar, date, weather_data, units, albedo, add_sky, add_sun).unwrap();
+        let found_vec = PerezSky::gen_sky_vec(
+            mf,
+            &solar,
+            date,
+            weather_data,
+            units,
+            albedo,
+            add_sky,
+            add_sun,
+        )
+        .unwrap();
         println!("{}", found_vec);
         let exp_vec = read_colour_matrix("./test_data/solar_with_sun.txt".to_string()).unwrap();
-        
+
         let (nrows, ncols) = found_vec.size();
         assert_eq!((nrows, ncols), exp_vec.size());
         let mut max_err = 0.0;
         let mut max_err_percent = 0.0;
-        for nrow in 0..nrows{
-            for ncol in 0..ncols{
-                let exp = exp_vec.get(nrow,ncol).unwrap();
-                let found = found_vec.get(nrow,ncol).unwrap();
-                
-                if exp < 1e-9{
+        for nrow in 0..nrows {
+            for ncol in 0..ncols {
+                let exp = exp_vec.get(nrow, ncol).unwrap();
+                let found = found_vec.get(nrow, ncol).unwrap();
+
+                if exp < 1e-9 {
                     assert!(found < 1e-9, "Expecting Zero, found {}", exp);
-                }else{
+                } else {
                     let allowed_err = allowed_err(add_sun);
-                    let err = (exp - found).abs(); 
-                    let err_percent = 100.*err/exp;
+                    let err = (exp - found).abs();
+                    let err_percent = 100. * err / exp;
                     if err >= max_err {
                         max_err = err;
                     }
                     if err_percent >= max_err_percent {
                         max_err_percent = err_percent
                     }
-                    assert!(err_percent < allowed_err, "err = {} | err_percent = {}%| exp = {}, found = {}", err, err_percent, exp, found);
+                    assert!(
+                        err_percent < allowed_err,
+                        "err = {} | err_percent = {}%| exp = {}, found = {}",
+                        err,
+                        err_percent,
+                        exp,
+                        found
+                    );
                 }
             }
         }
@@ -882,7 +963,7 @@ mod tests {
     #[test]
     fn test_gen_sky_vec_solar_no_sun() {
         let mf = 1;
-        let lat = -41.41 * PI / 180.;        
+        let lat = -41.41 * PI / 180.;
         let lon = -174.87 * PI / 180.;
         let std_mer = -180. * PI / 180.;
         let month = 1;
@@ -904,44 +985,59 @@ mod tests {
             ..CurrentWeather::default()
         };
 
-        let found_vec = PerezSky::gen_sky_vec(mf, &solar, date, weather_data, units, albedo, add_sky, add_sun).unwrap();
+        let found_vec = PerezSky::gen_sky_vec(
+            mf,
+            &solar,
+            date,
+            weather_data,
+            units,
+            albedo,
+            add_sky,
+            add_sun,
+        )
+        .unwrap();
         println!("{}", found_vec);
         let exp_vec = read_colour_matrix("./test_data/solar_no_sun.txt".to_string()).unwrap();
-        
+
         let (nrows, ncols) = found_vec.size();
         assert_eq!((nrows, ncols), exp_vec.size());
         let mut max_err = 0.0;
         let mut max_err_percent = 0.0;
-        for nrow in 0..nrows{
-            for ncol in 0..ncols{
-                let exp = exp_vec.get(nrow,ncol).unwrap();
-                let found = found_vec.get(nrow,ncol).unwrap();
-                
-                if exp < 1e-9{
+        for nrow in 0..nrows {
+            for ncol in 0..ncols {
+                let exp = exp_vec.get(nrow, ncol).unwrap();
+                let found = found_vec.get(nrow, ncol).unwrap();
+
+                if exp < 1e-9 {
                     assert!(found < 1e-9, "Expecting Zero, found {}", exp);
-                }else{
+                } else {
                     let allowed_err = allowed_err(add_sun);
-                    let err = (exp - found).abs(); 
-                    let err_percent = 100.*err/exp;
+                    let err = (exp - found).abs();
+                    let err_percent = 100. * err / exp;
                     if err >= max_err {
                         max_err = err;
                     }
                     if err_percent >= max_err_percent {
                         max_err_percent = err_percent
                     }
-                    assert!(err_percent < allowed_err, "err = {} | err_percent = {}%| exp = {}, found = {}", err, err_percent, exp, found);
+                    assert!(
+                        err_percent < allowed_err,
+                        "err = {} | err_percent = {}%| exp = {}, found = {}",
+                        err,
+                        err_percent,
+                        exp,
+                        found
+                    );
                 }
-
             }
         }
         println!("err = {} | err_percent = {}%", max_err, max_err_percent);
     }
 
-
     #[test]
     fn test_gen_sky_vec_visible_no_sun() {
         let mf = 1;
-        let lat = -41.41 * PI / 180.;        
+        let lat = -41.41 * PI / 180.;
         let lon = -174.87 * PI / 180.;
         let std_mer = -180. * PI / 180.;
         let month = 1;
@@ -963,32 +1059,49 @@ mod tests {
             ..CurrentWeather::default()
         };
 
-        let found_vec = PerezSky::gen_sky_vec(mf, &solar, date, weather_data, units, albedo, add_sky, add_sun).unwrap();
+        let found_vec = PerezSky::gen_sky_vec(
+            mf,
+            &solar,
+            date,
+            weather_data,
+            units,
+            albedo,
+            add_sky,
+            add_sun,
+        )
+        .unwrap();
         println!("{}", found_vec);
         let exp_vec = read_colour_matrix("./test_data/visible_no_sun.txt".to_string()).unwrap();
-        
+
         let (nrows, ncols) = found_vec.size();
         assert_eq!((nrows, ncols), exp_vec.size());
         let mut max_err = 0.0;
         let mut max_err_percent = 0.0;
-        for nrow in 0..nrows{
-            for ncol in 0..ncols{
-                let exp = exp_vec.get(nrow,ncol).unwrap();
-                let found = found_vec.get(nrow,ncol).unwrap();
-                
-                if exp < 1e-9{
+        for nrow in 0..nrows {
+            for ncol in 0..ncols {
+                let exp = exp_vec.get(nrow, ncol).unwrap();
+                let found = found_vec.get(nrow, ncol).unwrap();
+
+                if exp < 1e-9 {
                     assert!(found < 1e-9, "Expecting Zero, found {}", exp);
-                }else{
+                } else {
                     let allowed_err = allowed_err(add_sun);
-                    let err = (exp - found).abs(); 
-                    let err_percent = 100.*err/exp;
+                    let err = (exp - found).abs();
+                    let err_percent = 100. * err / exp;
                     if err >= max_err {
-                        max_err = err;                        
+                        max_err = err;
                     }
                     if err_percent >= max_err_percent {
                         max_err_percent = err_percent
                     }
-                    assert!(err_percent < allowed_err, "err = {} | err_percent = {}%| exp = {}, found = {}", err, err_percent, exp, found);
+                    assert!(
+                        err_percent < allowed_err,
+                        "err = {} | err_percent = {}%| exp = {}, found = {}",
+                        err,
+                        err_percent,
+                        exp,
+                        found
+                    );
                 }
             }
         }
@@ -998,7 +1111,7 @@ mod tests {
     #[test]
     fn test_gen_sky_vec_visible_with_sun() {
         let mf = 1;
-        let lat = -41.41 * PI / 180.;        
+        let lat = -41.41 * PI / 180.;
         let lon = -174.87 * PI / 180.;
         let std_mer = -180. * PI / 180.;
         let month = 1;
@@ -1020,32 +1133,49 @@ mod tests {
             ..CurrentWeather::default()
         };
 
-        let found_vec = PerezSky::gen_sky_vec(mf, &solar, date, weather_data, units, albedo, add_sky, add_sun).unwrap();
+        let found_vec = PerezSky::gen_sky_vec(
+            mf,
+            &solar,
+            date,
+            weather_data,
+            units,
+            albedo,
+            add_sky,
+            add_sun,
+        )
+        .unwrap();
         println!("{}", found_vec);
         let exp_vec = read_colour_matrix("./test_data/visible_with_sun.txt".to_string()).unwrap();
-        
+
         let (nrows, ncols) = found_vec.size();
         assert_eq!((nrows, ncols), exp_vec.size());
         let mut max_err = 0.0;
         let mut max_err_percent = 0.0;
-        for nrow in 0..nrows{
-            for ncol in 0..ncols{
-                let exp = exp_vec.get(nrow,ncol).unwrap();
-                let found = found_vec.get(nrow,ncol).unwrap();
-                
-                if exp < 1e-9{
+        for nrow in 0..nrows {
+            for ncol in 0..ncols {
+                let exp = exp_vec.get(nrow, ncol).unwrap();
+                let found = found_vec.get(nrow, ncol).unwrap();
+
+                if exp < 1e-9 {
                     assert!(found < 1e-9, "Expecting Zero, found {}", exp);
-                }else{
+                } else {
                     let allowed_err = allowed_err(add_sun);
-                    let err = (exp - found).abs(); 
-                    let err_percent = 100.*err/exp;
+                    let err = (exp - found).abs();
+                    let err_percent = 100. * err / exp;
                     if err >= max_err {
                         max_err = err;
                     }
                     if err_percent >= max_err_percent {
                         max_err_percent = err_percent
                     }
-                    assert!(err_percent < allowed_err, "err = {} | err_percent = {}%| exp = {}, found = {}", err, err_percent, exp, found);
+                    assert!(
+                        err_percent < allowed_err,
+                        "err = {} | err_percent = {}%| exp = {}, found = {}",
+                        err,
+                        err_percent,
+                        exp,
+                        found
+                    );
                 }
             }
         }
@@ -1073,7 +1203,7 @@ mod tests {
             date,
             dew_point,
             diffuse_horizontal_irrad,
-            direct_normal_irrad,            
+            direct_normal_irrad,
         );
         let found = fun(Vector3D::new(
             0.04327423224079154,

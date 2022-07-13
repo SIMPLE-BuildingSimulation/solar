@@ -18,6 +18,21 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+#![deny(missing_docs)]
+
+//! Solar calculations library. Based on Duffie and Beckman's excellent book.
+//!
+//! We follow the convention of the book. This means that everything is in
+//! international units, and times are solar. Angles (inputs and outputs) are
+//! in Radians but can be converted into Degrees through the in_degrees() and
+//! in_radiance() functions.
+//!
+//! Solar azimuth angle is the angular displacement from south of the
+//! projection of beam radiation on the horizontal plane (Figure 1.6.1 of the Book).
+//! Displacements east of south are negative and west of south are positive.
+//!
+//! North points in the Y direction. East points in the X direction. Up points in Z.
+
 use geometry3d::Vector3D;
 
 mod reinhart_sky;
@@ -49,38 +64,28 @@ pub fn air_mass(solar_zenith: Float) -> Float {
     1. / (solar_zenith.cos() + 0.15 * (93.885 - solar_zenith.to_degrees()).powf(-1.253))
 }
 
-/// Solar calculations library. Based on Duffie and Beckman's excellent book.
-///
-/// We follow the convention of the book. This means that everything is in
-/// international units, and times are solar. Angles (inputs and outputs) are
-/// in Radians but can be converted into Degrees through the in_degrees() and
-/// in_radiance() functions.
-///
-/// Solar azimuth angle is the angular displacement from south of the
-/// projection of beam radiation on the horizontal plane (Figure 1.6.1 of the Book).
-/// Displacements east of south are negative and west of south are positive.
-///
-/// North points in the Y direction. East points in the X direction. Up points in Z.
-
 /// The solar equivalent of Date's "day of the year". The
 /// distinction is there so that we don't mistake solar and
 /// standard time
 pub struct Solar {
-    // Day of the year
-    //n: Float,
-    /// Latitude in Radians
+    /// Latitude in Radians. South is negative, North is positive.
     latitude: Float,
 
-    /// Longitude (in Radians)
+    /// Longitude (in Radians). East is negative, West is positive
+    ///
+    /// > Note that this is Radiance's conventions, which is the opposite of EPW files.
     longitude: Float,
 
-    /// Standard meridian (in Radians)
+    /// Standard meridian (in Radians). East is negative, West is positive.
+    ///
+    /// This value is essentially `-15.0*TimeZone` (e.g., GMT+1 becomes -15.0)
+    ///
+    ///  > Note that this is Radiance's conventions, which is the opposite of EPW files.
     standard_meridian: Float,
 }
 
 /// W/m2
 const SOLAR_CONSTANT: Float = 1367.0;
-
 
 /// Solar or Standard time, containing the day of the year 'n'
 #[derive(Clone, Copy)]
@@ -299,8 +304,6 @@ mod tests {
         println!("x:{}, y:{}", x, y);
         false
     }
-
-    
 
     #[test]
     fn test_unwrap_time() {

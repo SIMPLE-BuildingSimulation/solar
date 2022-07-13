@@ -52,17 +52,19 @@ fn patch_solid_angle(top_angle: Float, low_angle: Float, bins_in_row: usize) -> 
 fn bins_in_row(mf: usize, row: usize) -> usize {
     // This is missing the cap, which has only one element
     let nrows = 7 * mf;
-    if row == nrows {
-        1
-    } else if row > nrows {
-        panic!(
-            "The value received is larger than the number of rows! row = {}, nrows = {}",
-            row, nrows
-        )
-    } else {
-        // Somewhere in between
-        let i = ((row as f32 + 0.5) / mf as f32).floor() as usize;
-        mf * TNAZ[i]
+    match row.cmp(&nrows) {
+        std::cmp::Ordering::Equal => 1,
+        std::cmp::Ordering::Greater => {
+            panic!(
+                "The value received is larger than the number of rows! row = {}, nrows = {}",
+                row, nrows
+            )
+        }
+        _ => {
+            // Somewhere in between
+            let i = ((row as f32 + 0.5) / mf as f32).floor() as usize;
+            mf * TNAZ[i]
+        }
     }
 }
 
@@ -72,6 +74,7 @@ fn row_height(mf: usize) -> Float {
     PI / 2. / ((TNAZ.len() * mf) as Float + 0.5)
 }
 
+/// A structure that helps creating discretized Skies, using Reinhart's discretization
 pub struct ReinhartSky {
     /// Subdivition scheme
     pub mf: usize,
@@ -98,7 +101,7 @@ impl ReinhartSky {
     pub fn n_bins(mf: usize) -> usize {
         // 144 Tregenza divided in MF rows and cols; + Ground + Cap
         144 * mf.pow(2) + 2
-        
+
         // This below is what is written in Radiance's cal files, I think
         // fn raccum(mf: usize, row: usize) -> usize {
         //     if row == 0 {
@@ -153,15 +156,15 @@ impl ReinhartSky {
     /// The number of sky elements accumulated up to row `row` (inclusive).
     /// Rows are Zero-indexed (i.e., the first one is 0)
     fn raccum(&self, row: usize) -> usize {
-        if row == self.n_bins {
-            return self.n_bins;
-        } else if row > self.n_bins {
-            panic!(
-                "Trying to access an accumulated number of bins in row {}... only {} available",
-                row, self.n_rows
-            )
-        } else {
-            self.acc_bins[row]
+        match row.cmp(&self.n_bins) {
+            std::cmp::Ordering::Equal => self.n_bins,
+            std::cmp::Ordering::Greater => {
+                panic!(
+                    "Trying to access an accumulated number of bins in row {}... only {} available",
+                    row, self.n_rows
+                )
+            }
+            _ => self.acc_bins[row],
         }
     }
 
@@ -213,7 +216,6 @@ impl ReinhartSky {
             azimuth += 2. * PI;
         }
 
-
         // Size of a Bin in Radians
         let in_row = bins_in_row(self.mf, row);
         let bin_size = 2. * PI / in_row as Float;
@@ -233,9 +235,8 @@ impl ReinhartSky {
             return 0;
         }
 
-    
         // Get row
-        let row = self.sin_altitude_to_row(dir.z);        
+        let row = self.sin_altitude_to_row(dir.z);
         if row == self.n_rows - 1 {
             return self.n_bins - 1;
         }
