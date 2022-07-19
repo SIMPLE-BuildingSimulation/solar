@@ -445,9 +445,11 @@ impl PerezSky {
         and then here... refactoring might help
         */
         let day = Time::Standard(date.day_of_year());
-        let sun_position = match solar.sun_position(day) {
+        let sun_position = solar.sun_position(day);
+        let sun_position = match sun_position {
             Some(pos) => pos,
             None => {
+                // Vector3D::new(0., 0., -1.) // below the horizon
                 for bin in 0..r.n_bins {
                     vec.set(bin, 0, 0.0)?;
                 }
