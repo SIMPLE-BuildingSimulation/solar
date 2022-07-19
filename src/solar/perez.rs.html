@@ -2004,6 +2004,8 @@
 <span id="1964">1964</span>
 <span id="1965">1965</span>
 <span id="1966">1966</span>
+<span id="1967">1967</span>
+<span id="1968">1968</span>
 </pre><pre class="rust"><code><span class="comment">/*
 MIT License
 Copyright (c) 2021 Germán Molina
@@ -2451,9 +2453,11 @@ SOFTWARE.
         and then here... refactoring might help
         */</span>
         <span class="kw">let</span> <span class="ident">day</span> <span class="op">=</span> <span class="ident">Time::Standard</span>(<span class="ident">date</span>.<span class="ident">day_of_year</span>());
-        <span class="kw">let</span> <span class="ident">sun_position</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">solar</span>.<span class="ident">sun_position</span>(<span class="ident">day</span>) {
+        <span class="kw">let</span> <span class="ident">sun_position</span> <span class="op">=</span> <span class="ident">solar</span>.<span class="ident">sun_position</span>(<span class="ident">day</span>);
+        <span class="kw">let</span> <span class="ident">sun_position</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">sun_position</span> {
             <span class="prelude-val">Some</span>(<span class="ident">pos</span>) =&gt; <span class="ident">pos</span>,
             <span class="prelude-val">None</span> =&gt; {
+                <span class="comment">// Vector3D::new(0., 0., -1.) // below the horizon</span>
                 <span class="kw">for</span> <span class="ident">bin</span> <span class="kw">in</span> <span class="number">0</span>..<span class="ident">r</span>.<span class="ident">n_bins</span> {
                     <span class="ident">vec</span>.<span class="ident">set</span>(<span class="ident">bin</span>, <span class="number">0</span>, <span class="number">0.0</span>)<span class="question-mark">?</span>;
                 }
@@ -3971,5 +3975,5 @@ SOFTWARE.
     }
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="solar" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0-nightly (1c7b36d4d 2022-07-12)" ></div>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="solar" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0-nightly (f8588549c 2022-07-18)" ></div>
 </body></html>
